@@ -324,4 +324,23 @@ if sys.argv[1] == "--get":
 
     sys.exit()
 
+if sys.argv[1] == "--remove":
+    path = expanduser("~") + "/.keeday/" + sys.argv[2] + ".key"
+    
+    if not isfile(path):
+        print("No such user exists.")
+        sys.exit()
+
+    i = input("Are you sure you wish to remove user '"+sys.argv[2]+"'? Y/n: ")
+    if i != "Y":
+        print("Operation aborted.")
+        sys.exit()
+    else:
+        try:
+            os.remove(path)
+            sys.exit()
+        except:
+            print("An error occurred!")
+            sys.exit()
+
 print("Argument '" + sys.argv[1] + "' not recognized.")

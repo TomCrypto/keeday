@@ -13,7 +13,10 @@ create a new keeday user, as follows:
 keeday --new johndoe
 
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
-need to enter it whenever you want to look up one of your passwords.
+need to enter it, whenever you want to look up your passwords. You will need to
+remember only this passphrase, as everything else is stored - but - without the
+passphrase, all this stored information is not useful to anyone trying to break
+into your accounts as the password cryptographically depends on the passphrase.
 
 This will create a new file at "~/.keeday/johndoe.key", which is in JSON format.
 
@@ -60,7 +63,7 @@ you didn't change the passphrase in the meantime.
 This is it for basic operation of the tool!! However, there exist a couple more
 commands I wish to talk about. The first one is the following:
 
-keeday --passphrase user
+keeday --passphrase [user]
 
 This will reset your passphrase. You do not need to provide the old passphrase,
 but there's a catch - changing the passphrase will change *every* password that
@@ -73,18 +76,27 @@ not store any password anywhere on the computer but calculate them on the fly.
 
 The second command is:
 
-keeday --update user [category] [service] [identifier]
+keeday --update [user] [category] [service] [identifier]
 
 This is used to update an individual password if you ever need to change it for
 some reason. This will not affect any other password you have in any way.
 
 The reverse also exists:
 
-keeday --revert user [category] [service] [identifier]
+keeday --revert [user] [category] [service] [identifier]
 
 Which will instead go back to the previous password, in case you need it again.
 If there is no previous password ("--update" was never used on this entry) then
 the command will fail.
+
+There is one final easy instruction, which is just:
+
+keeday --remove [user]
+
+And simply - as you would expect - removes the specified user deleting the file
+corresponding to this user, and all his password entries. We make absolutely no
+guarantees as to how recoverable this data is (since after all, it is not meant
+to be sensitive data) so this should be used for maintenance purposes only.
 
 That's all, folks! If you need more direct control, find your password file:
 
