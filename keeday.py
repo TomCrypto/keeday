@@ -148,8 +148,10 @@ class Manager:
         if v == -1:
             return False
 
+        # Get the passphrase-only derived hashing key (constant salt)
         kdf = pbkdf2(sha512, passphrase.encode("utf-8"), SALT, ITERS, 64)
 
+        # This is where the cryptography really happens
         a = hmac.new(kdf, category.encode("utf-8"), sha512).digest()
         b = hmac.new(kdf, service.encode("utf-8"), sha512).digest()
         c = hmac.new(kdf, identifier.encode("utf-8"), sha512).digest()
