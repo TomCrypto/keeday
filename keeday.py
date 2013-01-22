@@ -100,8 +100,13 @@ class Manager:
         if v == -1:
             return False
 
-        self.data["pwentry"].delete(v)
-        return True
+        for t in range(len(self.data["pwentry"])):
+            v = self.data["pwentry"][t]
+            if v["category"] == category:
+                if v["service"] == service:
+                    if v["identifier"] == identifier:
+                        del self.data["pwentry"][t]
+                        return True
 
     def Add(self, category, service, identifier):
         if self.Index(category, service, identifier) != -1:
