@@ -333,7 +333,13 @@ if sys.argv[1] == "--remove":
         print("No such user exists.")
         sys.exit()
 
-    i = input("Are you sure you wish to remove user '"+sys.argv[2]+"'? Y/n: ")
+    try:
+        i = input("Are you sure you wish to remove user '"
+                  + sys.argv[2] + "'? Y/n: ")
+    except:
+        print("")
+        sys.exit()
+
     if i != "Y":
         print("Operation aborted.")
         sys.exit()
