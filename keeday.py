@@ -340,9 +340,9 @@ if sys.argv[1] == "--remove":
     else:
         try:
             os.remove(path)
-            sys.exit()
         except:
             print("An error occurred!")
-            sys.exit()
+
+    sys.exit()
 
 print("Argument '" + sys.argv[1] + "' not recognized.")
