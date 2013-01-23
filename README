@@ -5,7 +5,8 @@
 This small tool is a password manager, novel in that it does not let you choose
 your own passwords, but generates them itself without storing them directly. In
 fact, you select your own human-readable "tokens", and the tool will generate a
-strong password from the tokens using a provided passphrase.
+strong password from the tokens (for instance, a combination of a website and a
+username, or perhaps an email provider & address) using a secret passphrase.
 
 The following introduction assumes you setup a symlink "keeday" to the tool. If
 this is not the case, replace "keeday" by "./keeday.py", or "python3 keeday.py"
@@ -14,11 +15,11 @@ or whatever is needed to invoke the script with Python 3.2 (*not* Python 2.7!).
 Now, suppose you had a Gmail account, and were called John Doe. First, create a
 new keeday user, using the command below:
 
-keeday johndoe --new
+keeday johndoe --new    [or john, "john doe" with quotes, etc..]
 
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
 need to enter it, whenever you want to look up your passwords. You will need to
-remember only this passphrase, as everything else is stored - but - without the
+remember only this passphrase, as everything else is stored however without the
 passphrase, all this stored information is not useful to anyone trying to break
 into your accounts as the password cryptographically depends on the passphrase.
 
@@ -52,7 +53,7 @@ You will be prompted for a passphrase once more, enter the same one you entered
 upon user creation. The script will let you know if you type it wrong.
 
 If you typed the arguments right, a password should appear - this password will
-always be the same given the same fields and passphrase.
+always be the same given the same three fields and passphrase.
 
 If you need to delete a password entry, just type:
 
@@ -73,7 +74,7 @@ This will reset your passphrase. You do not need to provide the old passphrase,
 but there's a catch - changing the passphrase will change *every* password that
 the tool will produce, so you will need to update the password on every website
 you frequent if you do this. Therefore, only do it if your passphrase is stolen
-or compromised in general.
+or compromised in general, and don't let that happen often - preferably never.
 
 This is not a shortcoming of keeday - it's the price you pay for the ability to
 not store passwords anywhere on the computer by calculating them on the fly.
