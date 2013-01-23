@@ -53,7 +53,9 @@ You will be prompted for a passphrase once more, enter the same one you entered
 upon user creation. The script will let you know if you type it wrong.
 
 If you typed the arguments right, a password should appear - this password will
-always be the same given the same three fields and passphrase.
+always be the same given the same three fields and passphrase and contains some
+alphanumeric and non-alphanumeric characters which should satisfy most password
+requirements. You can use this password, in this case, on your Gmail account.
 
 If you need to delete a password entry, just type:
 
