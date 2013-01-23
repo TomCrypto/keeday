@@ -339,7 +339,7 @@ if sys.argv[1] == "--get":
             print("This entry does not exist.")
             os._exit(1)
 
-        print("Password: " + s)
+        print("Password  : " + s)
         f.Finish()
     except:
         print("An error occurred!")
