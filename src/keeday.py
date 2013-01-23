@@ -208,7 +208,7 @@ if len(sys.argv) == 1 or (len(sys.argv) == 2 and sys.argv[1] == "--help"):
     print("[user] --revert [c] [s] [i]     Reverts password entry update.")
     print("[user] --get    [c] [s] [i]     Derives password for entry.\n")
     print("       --help                   Displays this help page.")
-    print("\nSee the tool's README file for a detailed manual.")
+    print("\nSee the README file for an introduction, or consult the man page.")
     sys.exit()
 
 # First verify that the arguments make sense
@@ -225,7 +225,7 @@ if len(sys.argv) == 6:
     arg3 = sys.argv[5]
 
 short_cmd = ["--new", "--passphrase", "--remove", "--format"]
-long_cmd = ["--add", "--delete", "--upgrade", "--revert", "--get"]
+long_cmd = ["--add", "--delete", "--update", "--revert", "--get"]
 count = len(sys.argv)
 
 if (count == 6 and cmd in short_cmd) or (count == 3 and cmd in long_cmd):

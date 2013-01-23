@@ -116,6 +116,10 @@ For a quick reminder on how to use the tool, you can use the venerable:
 
 keeday --help    [with no other arguments]
 
+For more information on each command, you can consult the man page:
+
+man man/keeday   [or man keeday if you installed the man pages]
+
 That's all, folks! If you need more direct control, find your user file:
 
 cd ~/.keeday/

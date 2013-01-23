@@ -11,3 +11,5 @@ This is mostly an experimental prototype and is not specifically intended for re
 The only location this tool will write to is ~/.keeday/ , where ~ is your home directory. The folder will be created, assuming you run the script with appropriate permissions. **Do not run this tool as root under any circumstances, it doesn't need elevated privileges.**
 
 The tool's name is based on "key derivation function" (get it? ha ha)
+
+The source code is in the src folder, a man page is available in the man folder. See README for a short introduction to the tool, the LICENSE is to be read and understood.
