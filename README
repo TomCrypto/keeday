@@ -11,8 +11,8 @@ The following introduction assumes you setup a symlink "keeday" to the tool. If
 this is not the case, replace "keeday" by "./keeday.py", or "python3 keeday.py"
 or whatever is needed to invoke the script with Python 3.2 (*not* Python 2.7!).
 
-For instance, suppose you had a Gmail account, and were called John Doe. First,
-create a new keeday user, as follows:
+Now, suppose you had a Gmail account, and were called John Doe. First, create a
+new keeday user, using the command below:
 
 keeday --new johndoe
 
