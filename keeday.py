@@ -200,6 +200,11 @@ if len(sys.argv) == 2 or len(sys.argv) == 5:
 
 if sys.argv[1] == "--new":
     try:
+        f = Manager(sys.argv[2], False)
+    except:
+        print("An error occurred!")
+
+    try:
         passphrase = getpass("New passphrase: ")
         confirm    = getpass("Please confirm: ")
         if passphrase != confirm:
@@ -210,7 +215,6 @@ if sys.argv[1] == "--new":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2], False)
         f.ChangePassphrase(confirm)
         f.Finish()
     except:
