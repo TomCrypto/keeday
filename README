@@ -15,7 +15,7 @@ or whatever is needed to invoke the script with Python 3.2 (*not* Python 2.7!).
 Now, suppose you had a Gmail account, and were called John Doe. First, create a
 new keeday user, using the command below:
 
-keeday johndoe --new    [or john, "john doe" with quotes, etc..]
+keeday johndoe --new             [or john, "john doe" with quotes, etc..]
 
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
 need to enter it, whenever you want to look up your passwords. You will need to
@@ -114,11 +114,13 @@ that JSON does not require formatting, so this is just for your convenience.
 
 For a quick reminder on how to use the tool, you can use the venerable:
 
-keeday --help    [with no other arguments]
+keeday --help   [with no other arguments]
 
 For more information on each command, you can consult the man page:
 
-man man/keeday   [or man keeday if you installed the man pages]
+man man/keeday  [or man keeday if you installed the man page]
+
+-------------------------------------------------------------------------------
 
 That's all, folks! If you need more direct control, find your user file:
 

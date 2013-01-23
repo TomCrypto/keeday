@@ -12,4 +12,5 @@ The only location this tool will write to is ~/.keeday/ , where ~ is your home d
 
 The tool's name is based on "key derivation function" (get it? ha ha)
 
-The source code is in the src folder, a man page is available in the man folder. See README for a short introduction to the tool, the LICENSE is to be read and understood.
+The Python 3.2 source code is in the src folder, and a man page is available in the man folder.
+See README for a short introduction to the tool, the LICENSE is to be read and understood.
