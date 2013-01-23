@@ -103,7 +103,7 @@ class Manager:
         saltlen = self.data["passphrase"]["salt_len"]
         kdf = GetAuth(passphrase, authSalt, iters, saltlen)
 
-		# Sanity check...
+        # Sanity check...
         if saltlen == 0 or iters == 0:
             return False
         
@@ -366,13 +366,13 @@ elif sys.argv[1] == "--remove":
             print("An error occurred!")
 
 elif sys.argv[1] == "--format":
-	try:
-		# Simply passthrough the user file
-		f = Manager(sys.argv[2], True)
-		f.Finish()
+    try:
+        # Simply passthrough the user file
+        f = Manager(sys.argv[2], True)
+        f.Finish()
 
-	except:
-		print("An error occurred.")
+    except:
+        print("An error occurred.")
 
 else:
-	print("Command '" + sys.argv[1] + "' not recognized.")
+    print("Command '" + sys.argv[1] + "' not recognized.")
