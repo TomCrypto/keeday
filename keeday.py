@@ -56,7 +56,7 @@ def GetAuth(passphrase, authSalt):
     return b64encode(kdf).decode("utf-8")
 
 class Manager:
-    def __init__(self, username):
+    def __init__(self, username, existing):
         self.user = username
         if not os.path.exists(expanduser("~") + "/.keeday/"):
             os.makedirs(expanduser("~") + "/.keeday/")
@@ -64,8 +64,16 @@ class Manager:
         self.path = expanduser("~") + "/.keeday/" + self.user + ".key"
 
         if isfile(self.path):
+            if not existing:
+                print("This user already exists.")
+                os._exit(1) # I know..
+
             self.data = json.loads(open(self.path, "r").read())
         else:
+            if existing:
+                print("This user does not exist.")
+                os._exit(1)
+
             self.data = json.loads(DEFAULT)
 
     def Finish(self):
@@ -158,6 +166,7 @@ class Manager:
         c = hmac.new(kdf, identifier.encode("utf-8"), sha512).digest()
         d = hmac.new(kdf, v["counter"].to_bytes(8, 'big'), sha512).digest()
 
+        # Note + is concatenation (||) here!
         output = hmac.new(kdf, a + b + c + d, sha512).digest()
         pw = b64encode(output).decode("utf-8")
         return "#" + pw[:CHARS] + "==" # enforce special characters
@@ -191,7 +200,7 @@ if sys.argv[1] == "--new":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], False)
         f.ChangePassphrase(confirm)
         f.Finish()
     except:
@@ -207,7 +216,7 @@ if sys.argv[1] == "--add":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], True)
         if not f.CheckPassphrase(passphrase):
             print("Incorrect passphrase.")
             os._exit(1)
@@ -233,7 +242,7 @@ if sys.argv[1] == "--passphrase":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], True)
         f.ChangePassphrase(confirm)
         f.Finish()
     except:
@@ -249,7 +258,7 @@ if sys.argv[1] == "--update":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], True)
         if not f.CheckPassphrase(passphrase):
             print("Incorrect passphrase.")
             os._exit(1)
@@ -271,7 +280,7 @@ if sys.argv[1] == "--revert":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], True)
         if not f.CheckPassphrase(passphrase):
             print("Incorrect passphrase.")
             os._exit(1)
@@ -297,7 +306,7 @@ if sys.argv[1] == "--delete":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], True)
         if not f.CheckPassphrase(passphrase):
             print("Incorrect passphrase.")
             os._exit(1)
@@ -319,7 +328,7 @@ if sys.argv[1] == "--get":
         sys.exit()
 
     try:
-        f = Manager(sys.argv[2])
+        f = Manager(sys.argv[2], True)
         if not f.CheckPassphrase(passphrase):
             print("Incorrect passphrase.")
             os._exit(1)
