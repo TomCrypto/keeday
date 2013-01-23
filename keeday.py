@@ -77,7 +77,8 @@ class Manager:
             self.data = json.loads(DEFAULT)
 
     def Finish(self):
-        open(self.path, "w").write(json.dumps(self.data, indent = 2) + "\n")
+        output = json.dumps(self.data, indent = 2, sort_keys = True)
+        open(self.path, "w").write(output + "\n")
 
     def ChangePassphrase(self, passphrase):
         tag = GenAuth(passphrase)
@@ -339,7 +340,7 @@ if sys.argv[1] == "--get":
             print("This entry does not exist.")
             os._exit(1)
 
-        print("Password: " + s)
+        print("Password  : " + s)
         f.Finish()
     except:
         print("An error occurred!")
@@ -370,5 +371,16 @@ if sys.argv[1] == "--remove":
             print("An error occurred!")
 
     sys.exit()
+
+if sys.argv[1] == "--format":
+	try:
+		# Simply passthrough the user file
+		f = Manager(sys.argv[2], True)
+		f.Finish()
+
+	except:
+		print("An error occurred.")
+
+	sys.exit()
 
 print("Command '" + sys.argv[1] + "' not recognized.")

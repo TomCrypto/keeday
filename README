@@ -96,7 +96,7 @@ Which will instead go back to the previous password, in case you need it again.
 If there is no previous password ("--update" was never used on this entry) then
 the command will fail.
 
-There is one final easy instruction, which is just:
+There is also a command to remove a given user, which is just:
 
 keeday --remove [user]
 
@@ -105,7 +105,16 @@ corresponding to this user, and all his password entries. We make absolutely no
 guarantees as to how recoverable this data is (since after all, it is not meant
 to be sensitive data) so this should be used for maintenance purposes only.
 
-That's all, folks! If you need more direct control, find your password file:
+Finally, there is one final instruction:
+
+keeday --format [user]
+
+All this will do is read in the user file, parse it, and output it back to file
+with proper formatting. This serves no functional purpose other than fixing any
+formatting you may have removed while manually editing your file - but remember
+that JSON does not require formatting, so this is just for your convenience.
+
+That's all, folks! If you need more direct control, find your user file:
 
 cd ~/.keeday/
 cat user.key    [replace "user" with your chosen user name]
