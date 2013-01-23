@@ -22,37 +22,46 @@ import os
 
 # Number of KDF iterations, the higher the better, but the higher the slower it
 # will take to look up a password. Usually a few thousand iterations is good.
-ITERS = 25000
+AUTH_ITERS = 25000 # default: 25000
+HMAC_ITERS = 25000 # default: 25000
+
+# Length of the salt and KDF, in bytes. This should be at the very least 16.
+S_LEN = 40 # default: 40
 
 # Number of base characters in the generated passwords, note this excludes any
-# extra special characters which are always added to the passwords.
-CHARS = 30
+# extra special characters which are always added to the passwords in order to
+# fulfill the stupid "special character" requirements of some websites. Please
+# note you should avoid changing this too often, as it can get quite confusing
+# once you have many passwords in use. The default value should be good.
+PW_CHARS = 30 # default: 30
 
 # This is a constant salt for the actual password generation derived key. This
 # is because I wanted the generated passwords to depend only on the passphrase
 # in case the password entry file was lost or corrupted. I don't believe there
 # is a security concern in doing this, as the other hash for authentication is
 # using a pseudorandom salt. In any case, the iteration count is high enough.
-SALT = bytes([0x00] * 64)
+SALT = bytes([0x00] * sha512().digest_size)
 
-DEFAULT = '''{"passphrase":
-          {"authsalt": "",
-           "authhash": ""},
-           "pwentry" : []}'''
+DEFAULT = '''{"passphrase":{
+              "authsalt": "",
+              "authhash": "",
+              "salt_len":  0,
+              "iter_cnt":  0},
+              "pw_entry": []}'''
 
 def GenAuth(passphrase):
-    authSalt = os.urandom(64)
-    hashSalt = SALT 
+    authSalt = os.urandom(S_LEN)
 
-    kdf = pbkdf2(sha512, passphrase.encode("utf-8"), authSalt, ITERS, 64)
+    msg = passphrase.encode("utf-8")
+    kdf = pbkdf2(sha512, msg, authSalt, AUTH_ITERS, S_LEN)
 
     return (b64encode(authSalt).decode("utf-8"),
             b64encode(kdf).decode("utf-8"))
 
-def GetAuth(passphrase, authSalt):
+def GetAuth(passphrase, authSalt, iters, saltlen):
     salt = b64decode(authSalt.encode("utf-8"))
 
-    kdf = pbkdf2(sha512, passphrase.encode("utf-8"), salt, ITERS, 64)
+    kdf = pbkdf2(sha512, passphrase.encode("utf-8"), salt, iters, saltlen)
     return b64encode(kdf).decode("utf-8")
 
 class Manager:
@@ -85,10 +94,18 @@ class Manager:
 
         self.data["passphrase"]["authsalt"] = tag[0]
         self.data["passphrase"]["authhash"] = tag[1]
+        self.data["passphrase"]["salt_len"] = S_LEN
+        self.data["passphrase"]["iter_cnt"] = AUTH_ITERS
 
     def CheckPassphrase(self, passphrase):
         authSalt = self.data["passphrase"]["authsalt"]
-        kdf = GetAuth(passphrase, authSalt)
+        iters = self.data["passphrase"]["iter_cnt"]
+        saltlen = self.data["passphrase"]["salt_len"]
+        kdf = GetAuth(passphrase, authSalt, iters, saltlen)
+
+		# Sanity check...
+        if saltlen == 0 or iters == 0:
+            return False
         
         # Compare the expected and actual auth tags
         if self.data["passphrase"]["authhash"] != kdf:
@@ -97,7 +114,7 @@ class Manager:
             return True
 
     def Index(self, category, service, identifier):
-        for t in self.data["pwentry"]:
+        for t in self.data["pw_entry"]:
             if t["category"] == category:
                 if t["service"] == service:
                     if t["identifier"] == identifier:
@@ -110,12 +127,12 @@ class Manager:
         if v == -1:
             return False
 
-        for t in range(len(self.data["pwentry"])):
-            v = self.data["pwentry"][t]
+        for t in range(len(self.data["pw_entry"])):
+            v = self.data["pw_entry"][t]
             if v["category"] == category:
                 if v["service"] == service:
                     if v["identifier"] == identifier:
-                        del self.data["pwentry"][t]
+                        del self.data["pw_entry"][t]
                         return True
 
     def Add(self, category, service, identifier):
@@ -128,7 +145,7 @@ class Manager:
                   ("counter", 0)])
 
         # Add this entry to list
-        self.data["pwentry"].append(x)
+        self.data["pw_entry"].append(x)
         return True
 
     def Update(self, category, service, identifier):
@@ -151,15 +168,14 @@ class Manager:
             return True
 
     def GetPassword(self, passphrase, category, service, identifier):
-        if not self.CheckPassphrase(passphrase):
-            return False
-
         v = self.Index(category, service, identifier)
         if v == -1:
             return False
 
         # Get the passphrase-only derived hashing key (constant salt)
-        kdf = pbkdf2(sha512, passphrase.encode("utf-8"), SALT, ITERS, 64)
+        size = sha512().digest_size
+        msg = passphrase.encode("utf-8")
+        kdf = pbkdf2(sha512, msg, SALT, HMAC_ITERS, size)
 
         # This is where the cryptography really happens
         a = hmac.new(kdf, category.encode("utf-8"), sha512).digest()
@@ -170,7 +186,7 @@ class Manager:
         # Note + is concatenation (||) here!
         output = hmac.new(kdf, a + b + c + d, sha512).digest()
         pw = b64encode(output).decode("utf-8")
-        return "#" + pw[:CHARS] + "==" # enforce special characters
+        return "#" + pw[:PW_CHARS] + "==" # enforce special characters
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
