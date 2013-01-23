@@ -16,6 +16,9 @@ create a new keeday user, as follows:
 
 keeday --new johndoe
 
+If you do not specify a user name in this stage the tool will assume the system
+user name instead (it'll do this for every command if you omit the user name).
+
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
 need to enter it, whenever you want to look up your passwords. You will need to
 remember only this passphrase, as everything else is stored - but - without the

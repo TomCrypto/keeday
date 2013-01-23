@@ -7,6 +7,7 @@
 
 from os.path import expanduser
 from getpass import getpass
+from getpass import getuser
 from os.path import isfile
 from pbkdf2 import pbkdf2
 
@@ -164,6 +165,16 @@ class Manager:
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
 ################################################################################
+
+# Try and be intelligent and assume user name may be omitted
+
+if len(sys.argv) == 2:
+    sys.argv.append(getuser())
+    print("Assuming user '" + sys.argv[2] + "'...")
+
+if len(sys.argv) == 5:
+    sys.argv.insert(2, getuser())
+    print("Assuming user '" + sys.argv[2] + "'...")
 
 if len(sys.argv) < 2:
     sys.exit()
@@ -351,4 +362,4 @@ if sys.argv[1] == "--remove":
 
     sys.exit()
 
-print("Argument '" + sys.argv[1] + "' not recognized.")
+print("Command '" + sys.argv[1] + "' not recognized.")
