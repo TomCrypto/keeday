@@ -149,7 +149,7 @@ class Manager:
     ''' This method will update an existing password entry. '''
     def Update(self, category, service, identifier):
         entry = self.Find(category, service, identifier)
-        if entry == False:
+        if not entry:
             return False
 
         entry["counter"] += 1
@@ -158,7 +158,7 @@ class Manager:
     ''' This method will revert an existing password entry. '''
     def Revert(self, category, service, identifier):
         entry = self.Find(category, service, identifier)
-        if entry == False or entry["counter"] == 0:
+        if not entry or entry["counter"] == 0:
             return False
 
         entry["counter"] -= 1
@@ -167,7 +167,7 @@ class Manager:
     ''' This method will generate and return the requested password. '''
     def GetPassword(self, passphrase, category, service, identifier):
         entry = self.Find(category, service, identifier)
-        if entry == False:
+        if not entry:
             return False
 
         # Convert each token to a binary format
@@ -303,7 +303,7 @@ elif cmd == "--get":
                 print("")
 
             pw = f.GetPassword(passphrase, arg1, arg2, arg3)
-            if pw == False:
+            if not pw:
                 print("Entry does not exist.") # should not happen
             else:
                 print("Password  : " + pw)
