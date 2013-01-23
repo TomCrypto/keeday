@@ -21,8 +21,8 @@ import json, sys, os
 
 # Number of KDF iterations, the higher the better but the higher the slower it
 # will take to look up a password. Usually a few thousand iterations is good.
-KDF_ITER = 25000
-# default: 25000
+KDF_ITER = 40000
+# default: 40000
 
 # Length of the salt and of the authentication hash, in bytes. This should be,
 # at the very least, 16, and has a maximum value of 64 (512 bits).
