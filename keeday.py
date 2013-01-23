@@ -32,8 +32,8 @@ SALT_LEN = 40
 # Number of base characters in the generated passwords, note this excludes any
 # extra special characters which are always added to the passwords in order to
 # fulfill the stupid "special character" requirements of some websites. Please
-# note you should avoid changing this too often, as it can get quite confusing
-# once you have many passwords in use. The default value should be good.
+# note you should avoid changing this too often as it is not on a per-password
+# basis and will get confusing. The default value should be good. Maximum ~80.
 PASS_LEN = 25
 # default: 25
 
@@ -187,7 +187,7 @@ class Manager:
         # Note a + b + c + d represents concatenation in this case!
         output = hmac.new(self.key, a + b + c + d, sha512).digest()
         
-        return "#" + b64encode(output, b'#+').decode("utf-8")[:PASS_LEN] + "#"
+        return "!" + b64encode(output, b'#+').decode("utf-8")[:PASS_LEN] + "*"
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
