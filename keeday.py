@@ -77,7 +77,7 @@ class Manager:
             self.data = json.loads(DEFAULT)
 
     def Finish(self):
-        open(self.path, "w").write(json.dumps(self.data))
+        open(self.path, "w").write(json.dumps(self.data, indent = 2) + "\n")
 
     def ChangePassphrase(self, passphrase):
         tag = GenAuth(passphrase)
