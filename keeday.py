@@ -20,7 +20,7 @@ import json
 import sys
 import os
 
-# Number of KDF iterations, the higher the better, but the higher the slowe it
+# Number of KDF iterations, the higher the better, but the higher the slower it
 # will take to look up a password. Usually a few thousand iterations is good.
 ITERS = 25000
 
