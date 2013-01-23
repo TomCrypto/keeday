@@ -64,7 +64,8 @@ class Manager:
                 raise IOError("User already exists.")
 
         if mustexist:
-            self.data = json.loads(open(self.path[1], "r").read())
+            with open(self.path[1], "r") as userfile:
+                self.data = json.loads(userfile.read())
         else:
             self.data = json.loads(EMPTY)
 
@@ -75,7 +76,8 @@ class Manager:
     ''' This method will save the current data to the user's file. '''
     def Finish(self):
         output = json.dumps(self.data, indent = 2, sort_keys = True)
-        open(self.path[1], "w").write(output + "\n")
+        with open(self.path[1], "w") as userfile:
+            userfile.write(output + "\n")
 
     ''' This method will change the user's passphrase to the argument. '''
     def ChangePassphrase(self, passphrase):
@@ -136,10 +138,10 @@ class Manager:
         if self.Exists(category, service, identifier):
             return False
 
-        entry = dict([("category",   category),
-                      ("service",    service),
-                      ("identifier", identifier),
-                      ("counter",    0)])
+        entry = {"category"  : category,
+                 "service"   : service,
+                 "identifier": identifier,
+                 "counter"   : 0}
 
         self.data["entries"].append(entry)
         return True
