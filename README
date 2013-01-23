@@ -131,6 +131,14 @@ This is a JSON file containing authentication data and each individual password
 entry, which you can edit at will. If keeday won't run after you mess with this
 file, make sure your JSON syntax is correct, as that's the most likely cause.
 
+Make sure to regularly up back your user file, as mentioned before, it does not
+need to be kept secret and can be disclosed, if you are OK with making websites
+and services you frequent public knowledge. The user file won't disclose either
+your passphrase or your individual passwords.
+
+Of course you can always encrypt the user file for backup or archival with your
+favorite file encryption tool, it's just a simple text file.
+
 Thank you for using keeday!
 
 ~ TomCrypto (contact: github)
