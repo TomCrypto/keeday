@@ -208,11 +208,11 @@ if len(sys.argv) > 3:
     arg2 = sys.argv[4]
     arg3 = sys.argv[5]
 
-if cmd == "--new" or cmd == "--passphrase":
-    try:
+try:
+    if cmd == "--new" or cmd == "--passphrase":
         # Create a new user file
         f = Manager(user, cmd == "--passphrase")
-        
+            
         try:
             passphrase = getpass("New passphrase: ")
             confirm    = getpass("Please confirm: ")
@@ -227,11 +227,7 @@ if cmd == "--new" or cmd == "--passphrase":
             f.ChangePassphrase(passphrase)
             f.Finish()
 
-    except Exception as e:
-        print("An error occurred: ", e)
-
-elif cmd == "--update" or cmd == "--revert" or cmd == "--delete":
-    try:
+    elif cmd == "--update" or cmd == "--revert" or cmd == "--delete":
         f = Manager(user, True)
         if cmd == "--update":
             if not f.Update(arg1, arg2, arg3):
@@ -250,29 +246,19 @@ elif cmd == "--update" or cmd == "--revert" or cmd == "--delete":
 
         f.Finish()
 
-    except Exception as e:
-        print("An error occurred: ", e)
-
-elif cmd == "--add":
-    try:
+    elif cmd == "--add":
         f = Manager(user, True)
 
         if not f.Add(arg1, arg2, arg3):
             print("Entry already exists.")
 
         f.Finish()
-    except Exception as e:
-        print("An error occurred: ", e)
 
-elif cmd == "--format":
-    try:
+    elif cmd == "--format":
         f = Manager(user, True)
         f.Finish()
-    except Exception as e:
-        print("An error occurred: ", e)
 
-elif cmd == "--remove":
-    try:
+    elif cmd == "--remove":
         f = Manager(user, True)
 
         try:
@@ -287,11 +273,7 @@ elif cmd == "--remove":
         else:
             f.RemoveUser()
 
-    except Exception as e:
-        print("An error occurred: ", e)
-
-elif cmd == "--get":
-    try:
+    elif cmd == "--get":
         f = Manager(user, True)
         if not f.Exists(arg1, arg2, arg3):
             print("Entry does not exist.")
@@ -308,8 +290,8 @@ elif cmd == "--get":
             else:
                 print("Password  : " + pw)
 
-    except Exception as e:
-        print("An error occurred: ", e)
+    else:
+        print("Command '" + cmd + "' not recognized.")
 
-else:
-    print("Command '" + cmd + "' not recognized.")
+except Exception as e:
+    print("An error occurred: ", e)
