@@ -14,10 +14,7 @@ or whatever is needed to invoke the script with Python 3.2 (*not* Python 2.7!).
 Now, suppose you had a Gmail account, and were called John Doe. First, create a
 new keeday user, using the command below:
 
-keeday --new johndoe
-
-If you do not specify a user name in this stage the tool will assume the system
-user name instead (it'll do this for every command if you omit the user name).
+keeday johndoe --new
 
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
 need to enter it, whenever you want to look up your passwords. You will need to
@@ -29,10 +26,10 @@ This will create a new file at "~/.keeday/johndoe.key", which is in JSON format.
 
 Now, create a new password entry as follows:
 
-keeday --add johndoe "email" "Gmail" "johndoe@gmail.com"
+keeday johndoe --add "email" "Gmail" "johndoe@gmail.com"
 
-Let's parse this, step by step. The first argument, "--add", indicates we would
-want the script to add a new password entry. The second argument should be your
+Let's parse this, step by step. The passed command, "--add", indicates we would
+want the script to add a new password entry. The first argument, should be your
 user name you entered earlier, as we'll be adding a password entry to that.
 
 The third, fourth, and fifth arguments represent the following:
@@ -49,7 +46,7 @@ purely indicative and you can use the three fields in any way you see fit.
 
 Now that the password entry has been added to your file, you may type:
 
-keeday --get johndoe "email" "Gmail" "johndoe@gmail.com"
+keeday johndoe --get "email" "Gmail" "johndoe@gmail.com"
 
 You will be prompted for a passphrase once more, enter the same one you entered
 upon user creation. The script will let you know if you type it wrong.
@@ -59,7 +56,7 @@ always be the same given the same fields and passphrase.
 
 If you need to delete a password entry, just type:
 
-keeday --delete johndoe "email" "Gmail" "johndoe@gmail.com"
+keeday johndoe --delete "email" "Gmail" "johndoe@gmail.com"
 
 The corresponding password entry will be deleted, and no other password will be
 affected. Note you can get your original password back - if you just retype the
@@ -70,7 +67,7 @@ you didn't change the passphrase in the meantime.
 This is it for basic operation of the tool!! However, there exist a couple more
 commands I wish to talk about. The first one is the following:
 
-keeday --passphrase [user]
+keeday [user] --passphrase
 
 This will reset your passphrase. You do not need to provide the old passphrase,
 but there's a catch - changing the passphrase will change *every* password that
@@ -79,18 +76,18 @@ you frequent if you do this. Therefore, only do it if your passphrase is stolen
 or compromised in general.
 
 This is not a shortcoming of keeday - it's the price you pay for the ability to
-not store any password anywhere on the computer but calculate them on the fly.
+not store passwords anywhere on the computer by calculating them on the fly.
 
 The second command is:
 
-keeday --update [user] [category] [service] [identifier]
+keeday [user] --update [category] [service] [identifier]
 
 This is used to update an individual password if you ever need to change it for
 some reason. This will not affect any other password you have in any way.
 
 The reverse also exists:
 
-keeday --revert [user] [category] [service] [identifier]
+keeday [user] --revert [category] [service] [identifier]
 
 Which will instead go back to the previous password, in case you need it again.
 If there is no previous password ("--update" was never used on this entry) then
@@ -98,7 +95,7 @@ the command will fail.
 
 There is also a command to remove a given user, which is just:
 
-keeday --remove [user]
+keeday [user] --remove
 
 And simply - as you would expect - removes the specified user deleting the file
 corresponding to this user, and all his password entries. We make absolutely no
@@ -107,12 +104,16 @@ to be sensitive data) so this should be used for maintenance purposes only.
 
 Finally, there is one final instruction:
 
-keeday --format [user]
+keeday [user] --format
 
 All this will do is read in the user file, parse it, and output it back to file
 with proper formatting. This serves no functional purpose other than fixing any
 formatting you may have removed while manually editing your file - but remember
 that JSON does not require formatting, so this is just for your convenience.
+
+For a quick reminder on how to use the tool, you can use the venerable:
+
+keeday --help    [with no other arguments]
 
 That's all, folks! If you need more direct control, find your user file:
 
@@ -121,7 +122,7 @@ cat user.key    [replace "user" with your chosen user name]
 
 This is a JSON file containing authentication data and each individual password
 entry, which you can edit at will. If keeday won't run after you mess with this
-file, make sure your JSON syntax is right, as that's the most likely cause.
+file, make sure your JSON syntax is correct, as that's the most likely cause.
 
 Thank you for using keeday!
 

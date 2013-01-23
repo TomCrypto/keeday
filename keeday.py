@@ -5,14 +5,12 @@
 # TomCrypto (contact: github)
 # Header written 23 Jan 2013
 
-# File/folder management imports
-from os.path import expanduser, exists
-from getpass import getuser
+# File and folder management imports
+from os.path import expanduser, exists, isfile
 from getpass import getpass
-from os.path import isfile
 from os import makedirs
 
-# Cryptographic imports
+# Cryptographic/encoding imports
 from base64 import b64encode, b64decode
 from hashlib import sha512
 from pbkdf2 import pbkdf2
@@ -189,24 +187,50 @@ class Manager:
         # Note a + b + c + d represents concatenation in this case!
         output = hmac.new(self.key, a + b + c + d, sha512).digest()
         
-        return "#" + b64encode(output, b"#+").decode("utf-8")[:PASS_LEN] + "#"
+        return "#" + b64encode(output, b'#+').decode("utf-8")[:PASS_LEN] + "#"
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
 ################################################################################
 
+# Handle the --help command separately
+if len(sys.argv) == 1 or (len(sys.argv) == 2 and sys.argv[1] == "--help"):
+    print("This is keeday, a password derivation tool. Usage:\n")
+    print("[user] --new                    Creates new user.")
+    print("[user] --remove                 Removes existing user.")
+    print("[user] --passphrase             Changes user passphrase.")
+    print("[user] --format                 Restores user file formatting.\n")
+    print("[user] --add    [c] [s] [i]     Creates new password entry for")
+    print("                                category [c], service [s], and")
+    print("                                identifier [i], and stores it.")
+    print("[user] --delete [c] [s] [i]     Deletes password entry.")
+    print("[user] --update [c] [s] [i]     Updates password entry.")
+    print("[user] --revert [c] [s] [i]     Reverts password entry update.")
+    print("[user] --get    [c] [s] [i]     Derives password for entry.\n")
+    print("       --help                   Displays this help page.")
+    print("\nSee the tool's README file for a detailed manual.")
+    sys.exit()
+
 # First verify that the arguments make sense
-if len(sys.argv) == 2 or len(sys.argv) == 5:
-    sys.argv.insert(2, getuser())
-    print("Note: assuming user '" + sys.argv[2] + "'.")
+if len(sys.argv) != 3 and len(sys.argv) != 6:
+    print("Invalid arguments.")
+    sys.exit()
 
 # Store arguments
-cmd  = sys.argv[1]
-user = sys.argv[2]
-if len(sys.argv) > 3:
+user = sys.argv[1]
+cmd  = sys.argv[2]
+if len(sys.argv) == 6:
     arg1 = sys.argv[3]
     arg2 = sys.argv[4]
     arg3 = sys.argv[5]
+
+short_cmd = ["--new", "--passphrase", "--remove", "--format"]
+long_cmd = ["--add", "--delete", "--upgrade", "--revert", "--get"]
+count = len(sys.argv)
+
+if (count == 6 and cmd in short_cmd) or (count == 3 and cmd in long_cmd):
+    print("Invalid arguments.")
+    sys.exit()
 
 try:
     if cmd == "--new" or cmd == "--passphrase":
@@ -216,12 +240,12 @@ try:
         try:
             passphrase = getpass("New passphrase: ")
             confirm    = getpass("Please confirm: ")
+            matching = (passphrase == confirm)
         except:
-            passphrase = ""
-            confirm = "no!"
+            matching = False
             print("") # for presentation
 
-        if passphrase != confirm:
+        if not matching:
             print("Passphrases do not match.")
         else:
             f.ChangePassphrase(passphrase)
@@ -236,7 +260,7 @@ try:
         if cmd == "--revert":
             if not f.Revert(arg1, arg2, arg3):
                 if f.Exists(arg1, arg2, arg3):
-                    print("Entry has never been updated - cannot revert.")
+                    print("Entry has not been updated yet - cannot revert.")
                 else:
                     print("Entry does not exist.")
 
@@ -291,7 +315,7 @@ try:
                 print("Password  : " + pw)
 
     else:
-        print("Command '" + cmd + "' not recognized.")
+        print("Command not recognized.")
 
 except Exception as e:
-    print("An error occurred: ", e)
+    print(e)
