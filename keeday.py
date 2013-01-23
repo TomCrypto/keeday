@@ -178,16 +178,9 @@ class Manager:
 
 # Try and be intelligent and assume user name may be omitted
 
-if len(sys.argv) == 2:
-    sys.argv.append(getuser())
-    print("Assuming user '" + sys.argv[2] + "'...")
-
-if len(sys.argv) == 5:
+if len(sys.argv) == 2 or len(sys.argv) == 5:
     sys.argv.insert(2, getuser())
     print("Assuming user '" + sys.argv[2] + "'...")
-
-if len(sys.argv) < 2:
-    sys.exit()
 
 if sys.argv[1] == "--new":
     try:
@@ -206,10 +199,8 @@ if sys.argv[1] == "--new":
         f.Finish()
     except:
         print("An error occurred!")
-    
-    sys.exit()
 
-if sys.argv[1] == "--add":
+elif sys.argv[1] == "--add":
     try:
         passphrase = getpass("Passphrase: ")
     except:
@@ -229,9 +220,7 @@ if sys.argv[1] == "--add":
     except:
         print("An error occurred!")
 
-    sys.exit()
-
-if sys.argv[1] == "--passphrase":
+elif sys.argv[1] == "--passphrase":
     try:
         passphrase = getpass("New passphrase: ")
         confirm    = getpass("Please confirm: ")
@@ -249,9 +238,7 @@ if sys.argv[1] == "--passphrase":
     except:
         print("An error occurred!")
 
-    sys.exit()
-
-if sys.argv[1] == "--update":
+elif sys.argv[1] == "--update":
     try:
         passphrase = getpass("Passphrase: ")
     except:
@@ -271,9 +258,7 @@ if sys.argv[1] == "--update":
     except:
         print("An error occurred!")
 
-    sys.exit()
-
-if sys.argv[1] == "--revert":
+elif sys.argv[1] == "--revert":
     try:
         passphrase = getpass("Passphrase: ")
     except:
@@ -296,10 +281,8 @@ if sys.argv[1] == "--revert":
         f.Finish()
     except:
         print("An error occurred!")
-        
-    sys.exit()
 
-if sys.argv[1] == "--delete":
+elif sys.argv[1] == "--delete":
     try:
         passphrase = getpass("Passphrase: ")
     except:
@@ -319,9 +302,7 @@ if sys.argv[1] == "--delete":
     except:
         print("An error occurred!")
 
-    sys.exit()
-
-if sys.argv[1] == "--get":
+elif sys.argv[1] == "--get":
     try:
         passphrase = getpass("Passphrase: ")
     except:
@@ -345,9 +326,7 @@ if sys.argv[1] == "--get":
     except:
         print("An error occurred!")
 
-    sys.exit()
-
-if sys.argv[1] == "--remove":
+elif sys.argv[1] == "--remove":
     path = expanduser("~") + "/.keeday/" + sys.argv[2] + ".key"
     
     if not isfile(path):
@@ -370,9 +349,7 @@ if sys.argv[1] == "--remove":
         except:
             print("An error occurred!")
 
-    sys.exit()
-
-if sys.argv[1] == "--format":
+elif sys.argv[1] == "--format":
 	try:
 		# Simply passthrough the user file
 		f = Manager(sys.argv[2], True)
@@ -381,6 +358,5 @@ if sys.argv[1] == "--format":
 	except:
 		print("An error occurred.")
 
-	sys.exit()
-
-print("Command '" + sys.argv[1] + "' not recognized.")
+else:
+	print("Command '" + sys.argv[1] + "' not recognized.")
