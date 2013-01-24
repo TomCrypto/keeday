@@ -57,9 +57,12 @@ class Manager:
 
         if isfile(self.path[1]) ^ mustexist:
             if mustexist:
-                raise IOError("User does not exist.")
+                # I realize raising an assertion exception is unconventional,
+                # but technically, the code asserts the user knows what he is
+                # doing, in such a way that this code path is never taken :]
+                raise AssertionError("User does not exist.")
             else:
-                raise IOError("User already exists.")
+                raise AssertionError("User already exists.")
 
         if mustexist:
             with open(self.path[1], "r") as userfile:
@@ -103,8 +106,8 @@ class Manager:
         salt = b64decode(salt_str.encode("utf-8"))
         self.key = pbkdf2(sha512, msg, salt, iter_cnt, SIZE)
         comp = sha512(self.key).digest()[:len(salt)]
-       
         comp_str = b64encode(comp).decode("utf-8")
+
         return comp_str == auth_str
 
     ''' This method will find a given password entry, optionally deleting it.
@@ -187,6 +190,7 @@ class Manager:
         # Note a + b + c + d represents concatenation in this case!
         output = hmac.new(self.key, a + b + c + d, sha512).digest()
         
+        # Add a few special characters to ensure there will be at least some
         return "!" + b64encode(output, b'#+').decode("utf-8")[:PASS_LEN] + "*"
 
 ################################################################################
@@ -207,11 +211,11 @@ if len(sys.argv) == 1 or (len(sys.argv) == 2 and sys.argv[1] == "--help"):
     print("[user] --update [c] [s] [i]     Updates password entry.")
     print("[user] --revert [c] [s] [i]     Reverts password entry update.")
     print("[user] --get    [c] [s] [i]     Derives password for entry.\n")
-    print("       --help                   Displays this help page.")
-    print("\nSee the README file for an introduction, or consult the man page.")
+    print("       --help                   Displays this help page.\n")
+    print("See the README file for an introduction, or consult the man page.")
     sys.exit()
 
-# First verify that the arguments make sense
+# First, verify that the arguments make sense
 if len(sys.argv) != 3 and len(sys.argv) != 6:
     print("Invalid arguments.")
     sys.exit()
