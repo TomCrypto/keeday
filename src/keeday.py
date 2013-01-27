@@ -34,7 +34,7 @@ SALT_LEN = 40
 # fulfill the stupid "special character" requirements of some websites. Please
 # note you should avoid changing this too often as it is not on a per-password
 # basis and will get confusing. The default value should be good. Maximum: 88.
-PASS_LEN = 88
+PASS_LEN = 25
 # default: 25
 
 # The output size of the SHA-512 hash function. This better be equal to 64.
