@@ -29,12 +29,12 @@ KDF_ITER = 40000
 SALT_LEN = 40
 # default: 40
 
-# Number of base characters in the generated passwords, note this excludes any
+# Number of base characters in the generated passwords, note this includes any
 # extra special characters which are always added to the passwords in order to
 # fulfill the stupid "special character" requirements of some websites. Please
 # note you should avoid changing this too often as it is not on a per-password
-# basis and will get confusing. The default value should be good. Maximum ~80.
-PASS_LEN = 25
+# basis and will get confusing. The default value should be good. Maximum: 88.
+PASS_LEN = 88
 # default: 25
 
 # The output size of the SHA-512 hash function. This better be equal to 64.
@@ -190,8 +190,9 @@ class Manager:
         # Note a + b + c + d represents concatenation in this case!
         output = hmac.new(self.key, a + b + c + d, sha512).digest()
         
-        # Add a few special characters to ensure there will be at least some
-        return "!" + b64encode(output, b'#+').decode("utf-8")[:PASS_LEN] + "*"
+        # Truncate base64 from the right to keep padding bits 
+        password = b64encode(output, b"#+").decode("utf-8")
+        return password[len(password) - PASS_LEN:]
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
