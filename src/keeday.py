@@ -12,6 +12,7 @@ from os import makedirs
 
 # Cryptographic/encoding imports
 from base64 import b64encode, b64decode
+from base64 import urlsafe_b64encode
 from hashlib import sha512
 from pbkdf2 import pbkdf2
 import hmac
@@ -191,7 +192,7 @@ class Manager:
         output = hmac.new(self.key, a + b + c + d, sha512).digest()
         
         # Truncate base64 from the right to keep padding bits 
-        password = b64encode(output, b"#+").decode("utf-8")
+        password = urlsafe_b64encode(output).decode("utf-8")
         return password[len(password) - PASS_LEN:]
 
 ################################################################################
