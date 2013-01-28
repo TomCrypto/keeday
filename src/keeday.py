@@ -113,10 +113,9 @@ class Manager:
 
     ''' This method will find a given password entry, optionally deleting it.
     If the entry does not exist in the file the method will return False. '''
-    def Find(self, category, service, identifier, delete = False):
+    def Find(self, service, identifier, delete = False):
         for entry in self.data["entries"]:
-            if entry["category"]   == category and \
-               entry["service"]    == service  and \
+            if entry["service"]    == service and \
                entry["identifier"] == identifier:
                 if not delete:
                     return entry
@@ -127,21 +126,20 @@ class Manager:
         return False
 
     ''' This method returns whether a password entry exists. '''
-    def Exists(self, category, service, identifier):
-        return self.Find(category, service, identifier) != False
+    def Exists(self, service, identifier):
+        return self.Find(service, identifier) != False
 
     ''' This method deletes an existing password entry. '''
-    def Delete(self, category, service, identifier):
-        entry = self.Find(category, service, identifier, True)
+    def Delete(self, service, identifier):
+        entry = self.Find(service, identifier, True)
         return entry
 
     ''' This method will add a password entry to the file. '''
-    def Add(self, category, service, identifier):
-        if self.Exists(category, service, identifier):
+    def Add(self, service, identifier):
+        if self.Exists(service, identifier):
             return False
 
-        entry = {"category"  : category,
-                 "service"   : service,
+        entry = {"service"  : service,
                  "identifier": identifier,
                  "counter"   : 0}
 
@@ -149,8 +147,8 @@ class Manager:
         return True
 
     ''' This method will update an existing password entry. '''
-    def Update(self, category, service, identifier):
-        entry = self.Find(category, service, identifier)
+    def Update(self, service, identifier):
+        entry = self.Find(service, identifier)
         if not entry:
             return False
 
@@ -158,8 +156,8 @@ class Manager:
         return True
 
     ''' This method will revert an existing password entry. '''
-    def Revert(self, category, service, identifier):
-        entry = self.Find(category, service, identifier)
+    def Revert(self, service, identifier):
+        entry = self.Find(service, identifier)
         if not entry or entry["counter"] == 0:
             return False
 
@@ -167,16 +165,15 @@ class Manager:
         return True
 
     ''' This method will generate and return the requested password. '''
-    def GetPassword(self, passphrase, category, service, identifier):
-        entry = self.Find(category, service, identifier)
+    def GetPassword(self, passphrase, service, identifier):
+        entry = self.Find(service, identifier)
         if not entry:
             return False
 
         # Convert each token to a binary format
-        tokenA = entry["category"].encode("utf-8")
-        tokenB = entry["service"].encode("utf-8")
-        tokenC = entry["identifier"].encode("utf-8")
-        tokenD = entry["counter"].to_bytes(8, "big")
+        tokenA = entry["service"].encode("utf-8")
+        tokenB = entry["identifier"].encode("utf-8")
+        tokenC = entry["counter"].to_bytes(8, "big") # 64-bit counter
 
         # Check that the passphrase is correct
         if not self.CheckPassphrase(passphrase):
@@ -186,10 +183,9 @@ class Manager:
         a = hmac.new(self.key, tokenA, sha512).digest()
         b = hmac.new(self.key, tokenB, sha512).digest()
         c = hmac.new(self.key, tokenC, sha512).digest()
-        d = hmac.new(self.key, tokenD, sha512).digest()
 
-        # Note a + b + c + d represents concatenation in this case!
-        output = hmac.new(self.key, a + b + c + d, sha512).digest()
+        # Note a + b + c represents concatenation in this case!
+        output = hmac.new(self.key, a + b + c, sha512).digest()
         
         # Truncate base64 from the right to keep padding bits 
         password = urlsafe_b64encode(output).decode("utf-8")
@@ -202,39 +198,37 @@ class Manager:
 # Handle the --help command separately
 if len(sys.argv) == 1 or (len(sys.argv) == 2 and sys.argv[1] == "--help"):
     print("This is keeday, a password derivation tool. Usage:\n")
-    print("[user] --new                    Creates new user.")
-    print("[user] --remove                 Removes existing user.")
-    print("[user] --passphrase             Changes user passphrase.")
-    print("[user] --format                 Restores user file formatting.\n")
-    print("[user] --add    [c] [s] [i]     Creates new password entry for")
-    print("                                category [c], service [s], and")
-    print("                                identifier [i], and stores it.")
-    print("[user] --delete [c] [s] [i]     Deletes password entry.")
-    print("[user] --update [c] [s] [i]     Updates password entry.")
-    print("[user] --revert [c] [s] [i]     Reverts password entry update.")
-    print("[user] --get    [c] [s] [i]     Derives password for entry.\n")
-    print("       --help                   Displays this help page.\n")
+    print("[user] --new                Creates new user.")
+    print("[user] --remove             Removes existing user.")
+    print("[user] --passphrase         Changes user passphrase.")
+    print("[user] --format             Restores user file formatting.\n")
+    print("[user] --add    [s] [i]     Creates new password entry, for")
+    print("                            service [s] and identifier [i].")
+    print("[user] --delete [s] [i]     Deletes password entry.")
+    print("[user] --update [s] [i]     Updates password entry.")
+    print("[user] --revert [s] [i]     Reverts password entry update.")
+    print("[user] --get    [s] [i]     Derives password for entry.\n")
+    print("       --help               Displays this help page.\n")
     print("See the README file for an introduction, or consult the man page.")
     sys.exit()
 
 # First, verify that the arguments make sense
-if len(sys.argv) != 3 and len(sys.argv) != 6:
+if len(sys.argv) != 3 and len(sys.argv) != 5:
     print("Invalid arguments.")
     sys.exit()
 
 # Store arguments
 user = sys.argv[1]
 cmd  = sys.argv[2]
-if len(sys.argv) == 6:
+if len(sys.argv) == 5:
     arg1 = sys.argv[3]
     arg2 = sys.argv[4]
-    arg3 = sys.argv[5]
 
 short_cmd = ["--new", "--passphrase", "--remove", "--format"]
 long_cmd = ["--add", "--delete", "--update", "--revert", "--get"]
 count = len(sys.argv)
 
-if (count == 6 and cmd in short_cmd) or (count == 3 and cmd in long_cmd):
+if (count == 5 and cmd in short_cmd) or (count == 3 and cmd in long_cmd):
     print("Invalid arguments.")
     sys.exit()
 
@@ -260,18 +254,18 @@ try:
     elif cmd == "--update" or cmd == "--revert" or cmd == "--delete":
         f = Manager(user, True)
         if cmd == "--update":
-            if not f.Update(arg1, arg2, arg3):
+            if not f.Update(arg1, arg2):
                 print("Entry does not exist.")
 
         if cmd == "--revert":
-            if not f.Revert(arg1, arg2, arg3):
-                if f.Exists(arg1, arg2, arg3):
+            if not f.Revert(arg1, arg2):
+                if f.Exists(arg1, arg2):
                     print("Entry has not been updated yet - cannot revert.")
                 else:
                     print("Entry does not exist.")
 
         if cmd == "--delete":
-            if not f.Delete(arg1, arg2, arg3):
+            if not f.Delete(arg1, arg2):
                 print("Entry does not exist.")
 
         f.Finish()
@@ -279,7 +273,7 @@ try:
     elif cmd == "--add":
         f = Manager(user, True)
 
-        if not f.Add(arg1, arg2, arg3):
+        if not f.Add(arg1, arg2):
             print("Entry already exists.")
 
         f.Finish()
@@ -305,7 +299,7 @@ try:
 
     elif cmd == "--get":
         f = Manager(user, True)
-        if not f.Exists(arg1, arg2, arg3):
+        if not f.Exists(arg1, arg2):
             print("Entry does not exist.")
         else:
             try:
@@ -314,7 +308,7 @@ try:
                 passphrase = ""
                 print("")
 
-            pw = f.GetPassword(passphrase, arg1, arg2, arg3)
+            pw = f.GetPassword(passphrase, arg1, arg2)
             if not pw:
                 print("Entry does not exist.") # should not happen
             else:
