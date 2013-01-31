@@ -4,7 +4,7 @@ keeday \- Password Derivation Tool
 .SH SYNOPSIS
 keeday command [arguments]
 .SH DESCRIPTION
-keeday is a password derivation tool for Python 3.2. Its goal is to help manage a list of strong passwords with the help of only a single secret passphrase. Passwords are then derived from "tokens", which are a combination of meaningful and preferably public information such as a website address, a user name, or a bank account number, and can be calculated as needed. The tokens can be safely stored or even remembered.
+keeday is a password derivation tool for Python 3.2. Its goal is to help manage a list of strong passwords with the help of only a single secret passphrase. Passwords are then derived from "tokens", which are a selection of meaningful and preferably public information such as a website address, a user name, or a bank account number, and can be calculated as needed. The tokens can be safely stored or even remembered.
 
 This tool uses strong cryptography (SHA512 and HMAC-SHA512) from Python's cryptographic hashing library (hashlib) and a custom, tested implementation of the PBKDF2-SHA512 key derivation function.
 .SH COMMANDS
@@ -16,7 +16,7 @@ where "user" is the user name passed to keeday and "~" is the system user's home
 will create a new user file, and prompt you for a passphrase. Make sure this passphrase is sufficiently long and known only to you, and remember it. After this command returns, your user file will contain some authentication data, used to verify your passphrase in further commands. This data does not compromise your passphrase in any way, and may be made public if required. This command will fail if the user already exists.
 
 .B keeday add [user] [service] [identifier] [length]
-will add a new password entry to the user file of [user], using the two tokens [service] and [identifier]. The last token (length in characters of the derived password) is optional and will default to whatever default value is set in the tool (typically 25). This command will fail if an identical entry with the same two tokens is already present, or if the user does not exist.
+will add a new password entry to the user file of [user], using the two tokens [service] and [identifier]. The last token (length in characters of the derived password) is optional and will default to whatever default value is set in the tool (typically 25). This command will fail if an identical entry with the same [service] and [identifier] tokens is already present, or if the user does not exist.
 
 .B keeday delete [user] [service] [identifier]
 will delete an existing password entry from the user file of [user]. This command will fail if no such entry is present, or if the user does not exist.
@@ -47,7 +47,7 @@ Most commands provided by keeday are not strictly necessary and can be performed
 and
 .B passphrase.
 
-Ensure your passphrase is kept secret, and periodically back up your user file, or at least the authentication section of it. It does not have to be secret if you are not bothered by others knowing what websites or services you use, and won't yield your passwords on its own.
+Ensure your passphrase is kept secret, and periodically back up your user file, or at least the authentication section of it. It does not have to be secret (it can even be made public if you are not bothered by others knowing what websites or services you use) and won't yield your passwords on its own.
 
 .SH AUTHOR
 Thomas BENETEAU (thomas.beneteau@yahoo.fr)
