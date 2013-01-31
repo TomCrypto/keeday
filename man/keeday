@@ -2,7 +2,7 @@
 .SH NAME
 keeday \- Password Derivation Tool
 .SH SYNOPSIS
-keeday [user] --command [service] [identifier]
+keeday command [arguments]
 .SH DESCRIPTION
 keeday is a password derivation tool for Python 3.2. Its goal is to help manage a list of strong passwords with the help of only a single secret passphrase. Passwords are then derived from "tokens", which are a combination of meaningful and preferably public information such as a website address, a user name, or a bank account number, and can be calculated as needed. The tokens can be safely stored or even remembered.
 
@@ -10,42 +10,42 @@ This tool uses strong cryptography (SHA512 and HMAC-SHA512) from Python's crypto
 .SH COMMANDS
 keeday provides multiple commands to manage passwords. A "password entry" is a combination of two tokens, which by convention represent a service or website (such as www.example.com), and an identifier (me@example.com, or your username at www.example.com). These entries are arranged in a list stored in a "user file", which will be located in
 .I ~/.keeday/user.key
-where "user" is the user name passed to keeday (this can be anything).
+where "user" is the user name passed to keeday and "~" is the system user's home directory.
 
-.B keeday [user] --new
+.B keeday new [user]
 will create a new user file, and prompt you for a passphrase. Make sure this passphrase is sufficiently long and known only to you, and remember it. After this command returns, your user file will contain some authentication data, used to verify your passphrase in further commands. This data does not compromise your passphrase in any way, and may be made public if required. This command will fail if the user already exists.
 
-.B keeday [user] --add [service] [identifier]
-will add a new password entry to the user file of [user], using the two tokens given. This command will fail if an identical entry with the same two tokens is already present, or if the user does not exist.
+.B keeday add [user] [service] [identifier] [length]
+will add a new password entry to the user file of [user], using the two tokens [service] and [identifier]. The last token (length in characters of the derived password) is optional and will default to whatever default value is set in the tool (typically 25). This command will fail if an identical entry with the same two tokens is already present, or if the user does not exist.
 
-.B keeday [user] --delete [service] [identifier]
+.B keeday delete [user] [service] [identifier]
 will delete an existing password entry from the user file of [user]. This command will fail if no such entry is present, or if the user does not exist.
 
-.B keeday [user] --update [service] [identifier]
+.B keeday update [user] [service] [identifier]
 will "update" an existing password entry from the user file of [user]. This is to be used in case your password on a given service is compromised, or needs to be changed for whatever reason, and will allow you to obtain a brand new password using the same tokens. This command may be called as often as desired, and will fail if there is no such password entry, or if the user does not exist.
 
-.B keeday [user] --revert [service] [identifier]
+.B keeday revert [user] [service] [identifier]
 will revert an existing password entry to the state it was in before it was updated. This command will fail if there is no such password entry, if the password entry has never been updated before (this includes previous reversions) or if the user does not exist.
 
-.B keeday [user] --get [service] [identifier]
+.B keeday get [user] [service] [identifier]
 will calculate the password corresponding to the given tokens. This command will prompt you for your passphrase, and will return a suitable password to use in the corresponding service or website, which can be recomputed at will. This password will contain non-alphanumeric characters by default, these can be manually stripped if not desired. This command will fail if the password entry does not exist, if the user does not exist, or if the passphrase given is incorrect.
 
-.B keeday [user] --passphrase
+.B keeday passphrase [user]
 will change the passphrase for [user]. The old passphrase is not required, but every password used by this user will have to be changed. This command should only be used when the existing passphrase is compromised. This command will fail if the user does not exist.
 
-.B keeday [user] --remove
+.B keeday remove [user]
 will remove the user [user], by deleting its user file. This command will fail if the user does not exist.
 
-.B keeday [user] --format
+.B keeday clean [user]
 will restore default formatting on the user file. This has no effect on the program's output, but can help clean up a user file which has been manually edited. This command will fail if the user does not exist.
 
 .SH NOTES
 
-Most commands provided by keeday are not strictly necessary and can be achieved by manually editing the user file, which is in JSON format. The only required commands are
-.B --new,
-.B --get,
+Most commands provided by keeday are not strictly necessary and can be performed by manually editing the user file, which is in JSON format. The only nontrivial commands are
+.B new,
+.B get,
 and
-.B --passphrase.
+.B passphrase.
 
 Ensure your passphrase is kept secret, and periodically back up your user file, or at least the authentication section of it. It does not have to be secret if you are not bothered by others knowing what websites or services you use, and won't yield your passwords on its own.
 

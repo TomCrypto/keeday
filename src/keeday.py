@@ -19,6 +19,7 @@ import hmac
 
 # Miscellaneous imports
 import json, sys, os
+import argparse
 
 # Number of KDF iterations, the higher the better but the higher the slower it
 # will take to look up a password. Usually a few thousand iterations is good.
@@ -46,8 +47,6 @@ EMPTY = '''{"authentication":{"auth_salt":"","auth_hash":"","iteration":0},
             "entries":[]}'''
 
 class Manager:
-    ''' This will open the corresponding user file. If the file is supposed to
-    exist but doesn't, or vice versa, the method will fail & return False. '''
     def __init__(self, user, mustexist):
         p = expanduser("~") + "/.keeday/"
         self.path = [p, p + user + ".key"]
@@ -71,17 +70,14 @@ class Manager:
         else:
             self.data = json.loads(EMPTY)
 
-    ''' This method will remove the user and delete his file. '''
     def RemoveUser(self):
         os.remove(self.path[1])
 
-    ''' This method will save the current data to the user's file. '''
     def Finish(self):
         output = json.dumps(self.data, indent = 2, sort_keys = True)
         with open(self.path[1], "w") as userfile:
             userfile.write(output + "\n")
 
-    ''' This method will change the user's passphrase to the argument. '''
     def ChangePassphrase(self, passphrase):
         msg = passphrase.encode("utf-8")
         salt = os.urandom(SALT_LEN)
@@ -96,8 +92,6 @@ class Manager:
         self.data["authentication"]["auth_hash"] = auth_str
         self.data["authentication"]["iteration"] = KDF_ITER
 
-    ''' This method will verify the passphrase against the user's current one,
-    returning True if the given passphrase is correct and False otherwise. '''
     def CheckPassphrase(self, passphrase):
         msg = passphrase.encode("utf-8")
         salt_str = self.data["authentication"]["auth_salt"]
@@ -111,8 +105,6 @@ class Manager:
 
         return comp_str == auth_str
 
-    ''' This method will find a given password entry, optionally deleting it.
-    If the entry does not exist in the file the method will return False. '''
     def Find(self, service, identifier, delete = False):
         for entry in self.data["entries"]:
             if entry["service"]    == service and \
@@ -125,28 +117,25 @@ class Manager:
 
         return False
 
-    ''' This method returns whether a password entry exists. '''
     def Exists(self, service, identifier):
         return self.Find(service, identifier) != False
 
-    ''' This method deletes an existing password entry. '''
     def Delete(self, service, identifier):
         entry = self.Find(service, identifier, True)
         return entry
 
-    ''' This method will add a password entry to the file. '''
-    def Add(self, service, identifier):
+    def Add(self, service, identifier, length):
         if self.Exists(service, identifier):
             return False
 
         entry = {"service"  : service,
                  "identifier": identifier,
-                 "counter"   : 0}
+                 "counter"   : 0,
+                 "length"    : length}
 
         self.data["entries"].append(entry)
         return True
 
-    ''' This method will update an existing password entry. '''
     def Update(self, service, identifier):
         entry = self.Find(service, identifier)
         if not entry:
@@ -155,7 +144,6 @@ class Manager:
         entry["counter"] += 1
         return True
 
-    ''' This method will revert an existing password entry. '''
     def Revert(self, service, identifier):
         entry = self.Find(service, identifier)
         if not entry or entry["counter"] == 0:
@@ -164,7 +152,6 @@ class Manager:
         entry["counter"] -= 1
         return True
 
-    ''' This method will generate and return the requested password. '''
     def GetPassword(self, passphrase, service, identifier):
         entry = self.Find(service, identifier)
         if not entry:
@@ -189,133 +176,130 @@ class Manager:
         
         # Truncate base64 from the right to keep padding bits 
         password = urlsafe_b64encode(output).decode("utf-8")
-        return password[len(password) - PASS_LEN:]
+        return password[len(password) - entry["length"]:]
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
 ################################################################################
 
-# Handle the --help command separately
-if len(sys.argv) == 1 or (len(sys.argv) == 2 and sys.argv[1] == "--help"):
-    print("This is keeday, a password derivation tool. Usage:\n")
-    print("[user] --new                Creates new user.")
-    print("[user] --remove             Removes existing user.")
-    print("[user] --passphrase         Changes user passphrase.")
-    print("[user] --format             Restores user file formatting.\n")
-    print("[user] --add    [s] [i]     Creates new password entry, for")
-    print("                            service [s] and identifier [i].")
-    print("[user] --delete [s] [i]     Deletes password entry.")
-    print("[user] --update [s] [i]     Updates password entry.")
-    print("[user] --revert [s] [i]     Reverts password entry update.")
-    print("[user] --get    [s] [i]     Derives password for entry.\n")
-    print("       --help               Displays this help page.\n")
-    print("See the README file for an introduction, or consult the man page.")
-    sys.exit()
+def main():
+    master = argparse.ArgumentParser(description = "Password derivation tool."
+                                     " See README, or consult the man pages.")
 
-# First, verify that the arguments make sense
-if len(sys.argv) != 3 and len(sys.argv) != 5:
-    print("Invalid arguments.")
-    sys.exit()
+    subparsers = master.add_subparsers(dest = "command")
 
-# Store arguments
-user = sys.argv[1]
-cmd  = sys.argv[2]
-if len(sys.argv) == 5:
-    arg1 = sys.argv[3]
-    arg2 = sys.argv[4]
+    # List of all commands with their description
+    commands = {"new"        : "create a new user file",
+                "remove"     : "remove existing user file",
+                "passphrase" : "change user passphrase",
+                "clean"      : "clean up a user file",
+                "add"        : "add a password entry",
+                "delete"     : "remove a password entry",
+                "update"     : "update a password entry",
+                "revert"     : "revert an entry update",
+                "get"        : "derive entry password"}
 
-short_cmd = ["--new", "--passphrase", "--remove", "--format"]
-long_cmd = ["--add", "--delete", "--update", "--revert", "--get"]
-count = len(sys.argv)
+    parsers = {}
+    for cmd in commands.keys():
+        parsers[cmd] = subparsers.add_parser(cmd, help = commands[cmd])
 
-if (count == 5 and cmd in short_cmd) or (count == 3 and cmd in long_cmd):
-    print("Invalid arguments.")
-    sys.exit()
+        parsers[cmd].add_argument("user")
 
-try:
-    if cmd == "--new" or cmd == "--passphrase":
-        # Create a new user file
-        f = Manager(user, cmd == "--passphrase")
-            
-        try:
-            passphrase = getpass("New passphrase: ")
-            confirm    = getpass("Please confirm: ")
-            matching = (passphrase == confirm)
-        except:
-            matching = False
-            print("") # for presentation
+        if cmd in ["add", "delete", "update", "revert", "get"]:
+            parsers[cmd].add_argument("service")
+            parsers[cmd].add_argument("identifier")
 
-        if not matching:
-            print("Passphrases do not match.")
-        else:
-            f.ChangePassphrase(passphrase)
-            f.Finish()
+        if cmd == "add": # the "add" argument needs password length
+            parsers[cmd].add_argument("length", type = int, nargs = '?',
+                                      default = PASS_LEN)
 
-    elif cmd == "--update" or cmd == "--revert" or cmd == "--delete":
-        f = Manager(user, True)
-        if cmd == "--update":
-            if not f.Update(arg1, arg2):
-                print("Entry does not exist.")
+    arg = master.parse_args()
+    cmd = arg.command
 
-        if cmd == "--revert":
-            if not f.Revert(arg1, arg2):
-                if f.Exists(arg1, arg2):
-                    print("Entry has not been updated yet - cannot revert.")
-                else:
+    try:
+        if cmd == "new" or cmd == "passphrase":
+            f = Manager(arg.user, cmd == "passphrase")
+                
+            try:
+                passphrase = getpass("New passphrase: ")
+                confirm    = getpass("Please confirm: ")
+            except:
+                print("") # for presentation
+                return
+
+            if passphrase != confirm:
+                print("Passphrases do not match.")
+            else:
+                f.ChangePassphrase(passphrase)
+                f.Finish()
+
+        elif cmd == "update" or cmd == "revert" or cmd == "delete":
+            f = Manager(arg.user, True)
+            if cmd == "update":
+                if not f.Update(arg.service, arg.identifier):
                     print("Entry does not exist.")
 
-        if cmd == "--delete":
-            if not f.Delete(arg1, arg2):
-                print("Entry does not exist.")
+            if cmd == "revert":
+                if not f.Revert(arg.service, arg.identifier):
+                    if f.Exists(arg.service, arg.identifier):
+                        print("Entry has not been updated - cannot revert.")
+                    else:
+                        print("Entry does not exist.")
 
-        f.Finish()
+            if cmd == "delete":
+                if not f.Delete(arg.service, arg.identifier):
+                    print("Entry does not exist.")
 
-    elif cmd == "--add":
-        f = Manager(user, True)
+            f.Finish()
 
-        if not f.Add(arg1, arg2):
-            print("Entry already exists.")
+        elif cmd == "add":
+            f = Manager(arg.user, True)
 
-        f.Finish()
+            if not f.Add(arg.service, arg.identifier, arg.length):
+                print("Entry already exists.")
 
-    elif cmd == "--format":
-        f = Manager(user, True)
-        f.Finish()
+            f.Finish()
 
-    elif cmd == "--remove":
-        f = Manager(user, True)
+        elif cmd == "clean":
+            f = Manager(arg.user, True)
+            f.Finish()
 
-        try:
-            p = input("Are you sure you wish to remove user '" + user +
-                      "'? Y/n: ")
-        except:
-            print("")
-            p = "n"
+        elif cmd == "remove":
+            f = Manager(arg.user, True)
 
-        if p != "Y":
-            print("User removal aborted.")
-        else:
-            f.RemoveUser()
-
-    elif cmd == "--get":
-        f = Manager(user, True)
-        if not f.Exists(arg1, arg2):
-            print("Entry does not exist.")
-        else:
             try:
-                passphrase = getpass("Passphrase: ")
+                p = input("Remove user '" + arg.user + "'? Y/n: ")
             except:
-                passphrase = ""
                 print("")
+                p = "n"
 
-            pw = f.GetPassword(passphrase, arg1, arg2)
-            if not pw:
-                print("Entry does not exist.") # should not happen
+            if p != "Y":
+                print("User removal aborted.")
             else:
-                print("Password  : " + pw)
+                f.RemoveUser()
 
-    else:
-        print("Command not recognized.")
+        elif cmd == "get":
+            f = Manager(arg.user, True)
+            if not f.Exists(arg.service, arg.identifier):
+                print("Entry does not exist.")
+            else:
+                try:
+                    passphrase = getpass("Passphrase: ")
+                except:
+                    print("")
+                    return
 
-except Exception as e:
-    print(e)
+                pw = f.GetPassword(passphrase, arg.service, arg.identifier)
+                if not pw:
+                    print("Entry does not exist.") # should not happen
+                else:
+                    print("Password  : " + pw)
+
+        else:
+            print("Command not recognized.")
+
+    except Exception as e:
+        print(e)
+
+if __name__ == '__main__':
+    main()

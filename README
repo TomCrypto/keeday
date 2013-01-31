@@ -15,7 +15,7 @@ or whatever is needed to invoke the script with Python 3.2 (*not* Python 2.7!).
 Now, suppose you had a Gmail account, and were called John Doe. First, create a
 new keeday user, using the command below:
 
-keeday johndoe --new             [or john, "john doe" with quotes, etc..]
+keeday new johndoe             [or john, "john doe" with quotes, etc..]
 
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
 need to enter it, whenever you want to look up your passwords. You will need to
@@ -27,13 +27,13 @@ This will create a new file at "~/.keeday/johndoe.key", which is in JSON format.
 
 Now, create a new password entry as follows:
 
-keeday johndoe --add "Gmail" "johndoe@gmail.com"
+keeday add johndoe "Gmail" "johndoe@gmail.com"
 
-Let's parse this, step by step. The passed command, "--add", indicates we would
-want the script to add a new password entry. The first argument, should be your
-user name you entered earlier, as we'll be adding a password entry to that.
+Let's parse this, step by step. The passed command "add" indicates that we want
+the script to add a new password entry. The second argument should be your user
+name you entered earlier, as we'll be adding a password entry to that.
 
-The third and fourth arguments represent the following:
+The two following arguments represent the following:
 
 Third : Service or website the generated password will be used for
 Fourth: Your identifier on said service or website (user name, or whatever)
@@ -42,11 +42,15 @@ As you can observe we want to add a password for the Gmail service, and on this
 mail server our identifier is just our email address.
 
 Note that it is all up to you what to write in those fields as all the above is
-purely indicative and you can use the three fields in any way you see fit.
+purely indicative and you can use the two fields in any way you see fit.
+
+There is an optional fifth argument which is the length you'd like the password
+to be (in characters). It will default to the value specified in the script and
+has a maximal value of 88. The default value should be 25.
 
 Now that the password entry has been added to your file, you may type:
 
-keeday johndoe --get "Gmail" "johndoe@gmail.com"
+keeday get johndoe "Gmail" "johndoe@gmail.com"
 
 You will be prompted for a passphrase once more, enter the same one you entered
 upon user creation. The script will let you know if you type it wrong.
@@ -58,7 +62,7 @@ requirements. You can use this password, in this case, on your Gmail account.
 
 If you need to delete a password entry, just type:
 
-keeday johndoe --delete "Gmail" "johndoe@gmail.com"
+keeday delete johndoe "Gmail" "johndoe@gmail.com"
 
 The corresponding password entry will be deleted, and no other password will be
 affected. Note you can get your original password back - if you just retype the
@@ -69,7 +73,7 @@ you didn't change the passphrase in the meantime.
 This is it for basic operation of the tool!! However, there exist a couple more
 commands I wish to talk about. The first one is the following:
 
-keeday [user] --passphrase
+keeday passphrase [user]
 
 This will reset your passphrase. You do not need to provide the old passphrase,
 but there's a catch - changing the passphrase will change *every* password that
@@ -82,14 +86,14 @@ not store passwords anywhere on the computer by calculating them on the fly.
 
 The second command is:
 
-keeday [user] --update [service] [identifier]
+keeday update [user] [service] [identifier]
 
 This is used to update an individual password if you ever need to change it for
 some reason. This will not affect any other password you have in any way.
 
 The reverse also exists:
 
-keeday [user] --revert [service] [identifier]
+keeday revert [user] [service] [identifier]
 
 Which will instead go back to the previous password, in case you need it again.
 If there is no previous password ("--update" was never used on this entry) then
@@ -97,7 +101,7 @@ the command will fail.
 
 There is also a command to remove a given user, which is just:
 
-keeday [user] --remove
+keeday remove [user]
 
 And simply - as you would expect - removes the specified user deleting the file
 corresponding to this user, and all his password entries. We make absolutely no
@@ -106,7 +110,7 @@ to be sensitive data) so this should be used for maintenance purposes only.
 
 Finally, there is one final instruction:
 
-keeday [user] --format
+keeday clean [user]
 
 All this will do is read in the user file, parse it, and output it back to file
 with proper formatting. This serves no functional purpose other than fixing any
@@ -115,7 +119,7 @@ that JSON does not require formatting, so this is just for your convenience.
 
 For a quick reminder on how to use the tool, you can use the venerable:
 
-keeday --help   [with no other arguments]
+keeday --help          or          keeday [command] --help
 
 For more information on each command, you can consult the man page:
 
