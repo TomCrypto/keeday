@@ -21,7 +21,8 @@ def hexadecimal(raw, length):
     if length is None: length = 25
     return hexlify(raw).decode("utf-8")[:int(length)] 
 
-# Same as the hexadecimal format, except using URL-safe Base64 encoding scheme  # and truncating from the right, to keep the padding symbols (==).
+# Same as the hexadecimal format, except using URL-safe Base64 encoding scheme
+# and truncating from the right, to keep the padding symbols (==).
 
 # Examples:
 # ncj3qNyuEUDYQ==
