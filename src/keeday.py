@@ -5,14 +5,13 @@
 # TomCrypto (contact: github)
 # Header written 23 Jan 2013
 
-# File and folder management imports
+# Operating system and filesystem management modules
 from os.path import expanduser, exists, isfile
 from getpass import getpass
 from os import makedirs
 
-# Cryptographic/encoding imports
+# Cryptographic and byte encoding imports
 from base64 import b64encode, b64decode
-from base64 import urlsafe_b64encode
 from hashlib import sha512
 from pbkdf2 import pbkdf2
 import hmac
@@ -20,6 +19,7 @@ import hmac
 # Miscellaneous imports
 import json, sys, os
 import argparse
+import pwfmt
 
 # Number of KDF iterations, the higher the better but the higher the slower it
 # will take to look up a password. Usually a few thousand iterations is good.
@@ -30,17 +30,6 @@ KDF_ITER = 40000
 # at the very least, 16, and has a maximum value of 64 (512 bits).
 SALT_LEN = 40
 # default: 40
-
-# Number of base characters in the generated passwords, note this includes any
-# extra special characters which are always added to the passwords in order to
-# fulfill the stupid "special character" requirements of some websites. Please
-# note you should avoid changing this too often as it is not on a per-password
-# basis and will get confusing. The default value should be good. Maximum: 88.
-PASS_LEN = 25
-# default: 25
-
-# The output size of the SHA-512 hash function. This better be equal to 64.
-SIZE = sha512().digest_size
 
 # This is a default empty user file which contains the required JSON fields
 EMPTY = '''{"authentication":{"auth_salt":"","auth_hash":"","iteration":0},
@@ -79,10 +68,10 @@ class Manager:
             userfile.write(output + "\n")
 
     def ChangePassphrase(self, passphrase):
-        msg = passphrase.encode("utf-8")
+        pw = passphrase.encode("utf-8")
         salt = os.urandom(SALT_LEN)
 
-        self.key = pbkdf2(sha512, msg, salt, KDF_ITER, SIZE)
+        self.key = pbkdf2(sha512, pw, salt, KDF_ITER, sha512().digest_size)
         auth = sha512(self.key).digest()[:len(salt)]
 
         salt_str = b64encode(salt).decode("utf-8")
@@ -93,17 +82,18 @@ class Manager:
         self.data["authentication"]["iteration"] = KDF_ITER
 
     def CheckPassphrase(self, passphrase):
-        msg = passphrase.encode("utf-8")
+        pw = passphrase.encode("utf-8")
         salt_str = self.data["authentication"]["auth_salt"]
         auth_str = self.data["authentication"]["auth_hash"]
         iter_cnt = self.data["authentication"]["iteration"]
 
         salt = b64decode(salt_str.encode("utf-8"))
-        self.key = pbkdf2(sha512, msg, salt, iter_cnt, SIZE)
-        comp = sha512(self.key).digest()[:len(salt)]
-        comp_str = b64encode(comp).decode("utf-8")
+        self.key = pbkdf2(sha512, pw, salt, iter_cnt, sha512().digest_size)
 
-        return comp_str == auth_str
+        comp = sha512(self.key).digest()[:len(salt)]
+        auth = b64decode(auth_str.encode("utf-8"))
+
+        return comp == auth # need constant-time comparison
 
     def Find(self, service, identifier, delete = False):
         for entry in self.data["entries"]:
@@ -124,14 +114,15 @@ class Manager:
         entry = self.Find(service, identifier, True)
         return entry
 
-    def Add(self, service, identifier, length):
+    def Add(self, service, identifier, pwfmt, pwprm):
         if self.Exists(service, identifier):
             return False
 
-        entry = {"service"  : service,
+        entry = {"service"   : service,
                  "identifier": identifier,
                  "counter"   : 0,
-                 "length"    : length}
+                 "pwfmt"     : pwfmt,
+                 "pwprm"     : pwprm}
 
         self.data["entries"].append(entry)
         return True
@@ -175,8 +166,10 @@ class Manager:
         output = hmac.new(self.key, a + b + c, sha512).digest()
         
         # Truncate base64 from the right to keep padding bits 
-        password = urlsafe_b64encode(output).decode("utf-8")
-        return password[len(password) - entry["length"]:]
+        return getattr(pwfmt, entry["pwfmt"])(output, entry["pwprm"]) 
+        # return pwfmt.base64(output, entry["length"])
+        # password = urlsafe_b64encode(output).decode("utf-8")
+        # return password[len(password) - entry["length"]:]
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
@@ -209,9 +202,11 @@ def main():
             parsers[cmd].add_argument("service")
             parsers[cmd].add_argument("identifier")
 
-        if cmd == "add": # the "add" argument needs password length
-            parsers[cmd].add_argument("length", type = int, nargs = '?',
-                                      default = PASS_LEN)
+        if cmd == "add": # the "add" argument needs format and params
+            parsers[cmd].add_argument("pwfmt", nargs = '?',
+                                      default = pwfmt.default)
+
+            parsers[cmd].add_argument("pwprm", nargs = '?', default = None)
 
     arg = master.parse_args()
     cmd = arg.command
@@ -255,7 +250,7 @@ def main():
         elif cmd == "add":
             f = Manager(arg.user, True)
 
-            if not f.Add(arg.service, arg.identifier, arg.length):
+            if not f.Add(arg.service, arg.identifier, arg.pwfmt, arg.pwprm):
                 print("Entry already exists.")
 
             f.Finish()
