@@ -1,11 +1,38 @@
 # Contains password formatting definitions, feel free to add more...
 # Each format is _required_ to provide entropy estimations!
 
+# The definitions should follow this template:
+#
+# class FormatName:
+#     @staticmethod
+#     def default():
+#         return # a sensible default parameter
+#
+#     @staticmethod
+#     def validate(params):
+#         # return True if valid parameter, False otherwise
+#
+#     @staticmethod
+#     def entropy(params):
+#         # return worst-case entropy of password with parameter params
+#
+#
+#     @staticmethod
+#     def format(raw, params):
+#         # return the formatted form of "raw" (512-bit pseudorandom buffer)
+#         # using the parameter params, as a human-readable string.
+
+ #############################################################################
+ #############################################################################
+
 from base64 import urlsafe_b64encode
 from binascii import hexlify
 
 # The default format
 default = 'Base64'
+
+ #############################################################################
+ #############################################################################
 
 # This simply prints out the hexadecimal representation of the derived key and
 # truncates it to obtain the desired password length.
@@ -36,6 +63,9 @@ class Hexadecimal:
     @staticmethod
     def format(raw, length):
         return hexlify(raw).decode("utf-8")[:length]
+
+ #############################################################################
+ #############################################################################
 
 # Same as the hexadecimal format, except using URL-safe Base64 encoding scheme
 # and truncating from the right, to keep the padding symbols (==).
@@ -69,6 +99,9 @@ class Base64:
         password = urlsafe_b64encode(raw).decode("utf-8")
         return password[len(password) - length:]
 
+ #############################################################################
+ #############################################################################
+
 # Flavour Star Trek style authorization code, the parameter indicates how many
 # words to use, randomly selected from a selection of words and numbers.
 
@@ -78,7 +111,7 @@ class Base64:
 # Data-Beta-Gamma-6-5
 
 # Parameter limits and entropy measure:
-# 3 < count <= 64 (could be higher with more efficient sampling, but ehh) 
+# 4 < count <= 64 (could be higher with more efficient sampling, but ehh) 
 # entropy = 15.77 + 4.169 * (count - 4) bits
 
 # Additional notes: if you want to play with the mappings, their size MUST be
@@ -92,7 +125,7 @@ class StarTrek:
     @staticmethod
     def validate(length):
         try:
-            return (length > 3) and (length <= 64)
+            return (length > 4) and (length <= 64)
         except:
             return False
 
