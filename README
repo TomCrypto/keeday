@@ -51,16 +51,29 @@ purely indicative and you can use the two fields in any way you see fit.
 There is a optional argument -f or --fmt which lets you specify a custom format
 for your password. It is used at the command line as follows:
     
- keeday add johndoe "Gmail" "johndoe@gmail.com" -f [format] [params]
+ keeday add johndoe "Gmail" "johndoe@gmail.com" -f [format]
 
 Where [format] is a valid password formatting type recognized by keeday such as
-the "Base64" or "Hexadecimal" ones, and [params] is an integer parameter, which
-generally represents the length of the password obtained. See the pwfmt.py file
-for more information on this. The default is a 25-character Base64 password.
+the "Base64" or "Hexadecimal" ones. You can also specify an integer parameter:
+
+ keeday add johndoe "Gmail" "johndoe@gmail.com" -p [param]
+
+Which generally represents the length of the password obtained.
+
+You can omit both options and they will default to "Base64" and 25 respectively
+which corresponds to a 25-character long Base64-encoded password. Providing the
+format but not the parameter is valid, and the default parameter will change to
+the default value specified for the format you selected.
+
+Specifying only the parameter and not the format is valid as well, in this case
+you will simply be choosing the length of your Base64-encoded password, ranging
+from 3 to 80 characters.
 
 This is helpful if you need your password to satisfy specific requirements, and
 in fact you can even write your own password formatter, by following a template
 in the pwfmt.py file, even with minimal programming skills.
+
+See the pwfmt.py file for more information on this.
 
 Please note that the generated password is secure ONLY up to user, service, and
 identifier. You CANNOT securely reuse the same password in two different places

@@ -114,7 +114,7 @@ class Manager:
         entry = self.Find(service, identifier, True)
         return entry
 
-    def Add(self, service, identifier, fmt, params):
+    def Add(self, service, identifier, fmt, param):
         if self.Exists(service, identifier):
             return False
 
@@ -124,17 +124,17 @@ class Manager:
         except:
             raise AssertionError("Unknown format.")
 
-        if params is None:
-            params = fmtClass.default()
+        if param is None:
+            param = fmtClass.default()
 
-        if not fmtClass.validate(params):
-            raise AssertionError("Invalid parameters.")
+        if not fmtClass.validate(param):
+            raise AssertionError("Invalid parameter.")
 
         entry = {"service"   : service,
                  "identifier": identifier,
                  "counter"   : 0,
                  "format"    : fmt,
-                 "params"    : params}
+                 "param"     : param}
 
         self.data["entries"].append(entry)
         return True
@@ -179,7 +179,7 @@ class Manager:
         
         # Get the proper password formatter class 
         fmtClass = getattr(pwfmt, entry["format"])
-        return fmtClass.format(output, entry["params"])
+        return fmtClass.format(output, entry["param"])
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
@@ -212,11 +212,11 @@ def main():
             parsers[cmd].add_argument("service")
             parsers[cmd].add_argument("identifier")
 
-        if cmd == "add": # the "add" argument has optional arguments
-            parsers[cmd].add_argument("-f", "--fmt", nargs = 2,
-                                      default = (pwfmt.default, None),
-                                      metavar = ("FORMAT", "PARAMS"),
-                                      help = "password formatting options")
+        if cmd == "add": # the "add" argument has format arguments
+            parsers[cmd].add_argument("-f", "--fmt", nargs = '?',
+                                      default = pwfmt.default)
+            parsers[cmd].add_argument("-p", "--param", nargs = '?',
+                                      default = None, type = int)
 
     arg = master.parse_args()
     cmd = arg.command
@@ -260,9 +260,7 @@ def main():
         elif cmd == "add":
             f = Manager(arg.user, True)
 
-            fmt = arg.fmt[0]
-            params = int(arg.fmt[1])
-            if not f.Add(arg.service, arg.identifier, fmt, params):
+            if not f.Add(arg.service, arg.identifier, arg.fmt, arg.param):
                 print("Entry already exists.")
 
             f.Finish()

@@ -9,18 +9,18 @@
 #         return # a sensible default parameter
 #
 #     @staticmethod
-#     def validate(params):
+#     def validate(param):
 #         # return True if valid parameter, False otherwise
 #
 #     @staticmethod
-#     def entropy(params):
-#         # return worst-case entropy of password with parameter params
+#     def entropy(param):
+#         # return worst-case entropy of password with parameter param
 #
 #
 #     @staticmethod
-#     def format(raw, params):
+#     def format(raw, param):
 #         # return the formatted form of "raw" (512-bit pseudorandom buffer)
-#         # using the parameter params, as a human-readable string.
+#         # using the parameter param, as a human-readable string.
 
  #############################################################################
  #############################################################################
