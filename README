@@ -15,19 +15,21 @@ or whatever is needed to invoke the script with Python 3.2 (*not* Python 2.7!).
 Now, suppose you had a Gmail account, and were called John Doe. First, create a
 new keeday user, using the command below:
 
-keeday new johndoe             [or john, "john doe" with quotes, etc..]
+ keeday new johndoe                    (or john, "john doe" with quotes, etc..)
 
 You will be prompted for a passphrase, enter it and REMEMBER IT, because you'll
 need to enter it, whenever you want to look up your passwords. You will need to
-remember only this passphrase, as everything else is stored however without the
-passphrase, all this stored information is not useful to anyone trying to break
-into your accounts as the password cryptographically depends on the passphrase.
+remember only this passphrase, as everything else is saved, however without the
+passphrase, all this information is useless to anyone trying to break into your
+accounts, as each password cryptographically depends on the passphrase.
 
-This will create a new file at "~/.keeday/johndoe.key", which is in JSON format.
+This will create a new file at "~/.keeday/johndoe.key" which is in JSON format.
+
+ ------------------------------------------------------------------------------
 
 Now, create a new password entry as follows:
 
-keeday add johndoe "Gmail" "johndoe@gmail.com"
+ keeday add johndoe "Gmail" "johndoe@gmail.com"
 
 Let's parse this, step by step. The passed command "add" indicates that we want
 the script to add a new password entry. The second argument should be your user
@@ -39,30 +41,51 @@ Third : Service or website the generated password will be used for
 Fourth: Your identifier on said service or website (user name, or whatever)
 
 As you can observe we want to add a password for the Gmail service, and on this
-mail server our identifier is just our email address.
+mail server our identifier is probably just our email address.
 
 Note that it is all up to you what to write in those fields as all the above is
 purely indicative and you can use the two fields in any way you see fit.
 
-There is an optional fifth argument which is the length you'd like the password
-to be (in characters). It will default to the value specified in the script and
-has a maximal value of 88. The default value should be 25.
+ ------------------------------------------------------------------------------
 
-Now that the password entry has been added to your file, you may type:
+There is a optional argument -f or --fmt which lets you specify a custom format
+for your password. It is used at the command line as follows:
+    
+ keeday add johndoe "Gmail" "johndoe@gmail.com" -f [format] [params]
 
-keeday get johndoe "Gmail" "johndoe@gmail.com"
+Where [format] is a valid password formatting type recognized by keeday such as
+the "Base64" or "Hexadecimal" ones, and [params] is an integer parameter, which
+generally represents the length of the password obtained. See the pwfmt.py file
+for more information on this. The default is a 25-character Base64 password.
+
+This is helpful if you need your password to satisfy specific requirements, and
+in fact you can even write your own password formatter, by following a template
+in the pwfmt.py file, even with minimal programming skills.
+
+Please note that the generated password is secure ONLY up to user, service, and
+identifier. You CANNOT securely reuse the same password in two different places
+merely by changing the password format. This can not happen if you use the tool
+properly but should be remembered if you often change your passwords.
+
+ ------------------------------------------------------------------------------
+
+Now that the password entry has been added to your user file, you may type:
+
+ keeday get johndoe "Gmail" "johndoe@gmail.com"
 
 You will be prompted for a passphrase once more, enter the same one you entered
 upon user creation. The script will let you know if you type it wrong.
 
 If you typed the arguments right, a password should appear - this password will
-always be the same, given the same two fields and passphrase, and contains some
-alphanumeric and non-alphanumeric characters which should satisfy most password
-requirements. You can use this password, in this case, on your Gmail account.
+always be the same, given the same two fields and passphrase. The password will
+be formatted according to the format you chose upon adding it. You can use this
+password, in this case, on your Gmail account.
+
+ ------------------------------------------------------------------------------
 
 If you need to delete a password entry, just type:
 
-keeday delete johndoe "Gmail" "johndoe@gmail.com"
+ keeday delete johndoe "Gmail" "johndoe@gmail.com"
 
 The corresponding password entry will be deleted, and no other password will be
 affected. Note you can get your original password back - if you just retype the
@@ -70,10 +93,12 @@ original fields in, and update the password to where it was when you deleted it
 (more on that later), and you should get the exact same password back, assuming
 you didn't change the passphrase in the meantime.
 
+ ------------------------------------------------------------------------------
+
 This is it for basic operation of the tool!! However, there exist a couple more
 commands I wish to talk about. The first one is the following:
 
-keeday passphrase [user]
+ keeday passphrase [user]
 
 This will reset your passphrase. You do not need to provide the old passphrase,
 but there's a catch - changing the passphrase will change *every* password that
@@ -84,33 +109,39 @@ or compromised in general, and don't let that happen often - preferably never.
 This is not a shortcoming of keeday - it's the price you pay for the ability to
 not store passwords anywhere on the computer by calculating them on the fly.
 
+ ------------------------------------------------------------------------------
+
 The second command is:
 
-keeday update [user] [service] [identifier]
+ keeday update [user] [service] [identifier]
 
 This is used to update an individual password if you ever need to change it for
 some reason. This will not affect any other password you have in any way.
 
 The reverse also exists:
 
-keeday revert [user] [service] [identifier]
+ keeday revert [user] [service] [identifier]
 
 Which will instead go back to the previous password, in case you need it again.
 If there is no previous password ("--update" was never used on this entry) then
 the command will fail.
 
+ ------------------------------------------------------------------------------
+
 There is also a command to remove a given user, which is just:
 
-keeday remove [user]
+ keeday remove [user]
 
 And simply - as you would expect - removes the specified user deleting the file
 corresponding to this user, and all his password entries. We make absolutely no
 guarantees as to how recoverable this data is (since after all, it is not meant
 to be sensitive data) so this should be used for maintenance purposes only.
 
+ ------------------------------------------------------------------------------
+
 Finally, there is one final instruction:
 
-keeday clean [user]
+ keeday clean [user]
 
 All this will do is read in the user file, parse it, and output it back to file
 with proper formatting. This serves no functional purpose other than fixing any
@@ -119,22 +150,24 @@ that JSON does not require formatting, so this is just for your convenience.
 
 For a quick reminder on how to use the tool, you can use the venerable:
 
-keeday --help          or          keeday [command] --help
+ keeday --help                    or                    keeday [command] --help
 
 For more information on each command, you can consult the man page:
 
-man man/keeday  [or man keeday if you installed the man page]
+ man man/keeday                   [or man keeday if you installed the man page]
 
 -------------------------------------------------------------------------------
 
 That's all, folks! If you need more direct control, find your user file:
 
-cd ~/.keeday/
-cat user.key    [replace "user" with your chosen user name]
+ cd ~/.keeday/
+ cat user.key                       [replace "user" with your chosen user name]
 
 This is a JSON file containing authentication data and each individual password
 entry, which you can edit at will. If keeday won't run after you mess with this
 file, make sure your JSON syntax is correct, as that's the most likely cause.
+
+ ------------------------------------------------------------------------------
 
 Make sure to regularly up back your user file, as mentioned before, it does not
 need to be kept secret and can be disclosed, if you are OK with making websites
@@ -143,6 +176,8 @@ your passphrase or your individual passwords.
 
 Of course you can always encrypt the user file for backup or archival with your
 favorite file encryption tool, it's just a simple text file.
+
+ ------------------------------------------------------------------------------
 
 Thank you for using keeday!
 

@@ -114,15 +114,27 @@ class Manager:
         entry = self.Find(service, identifier, True)
         return entry
 
-    def Add(self, service, identifier, pwfmt, pwprm):
+    def Add(self, service, identifier, fmt, params):
         if self.Exists(service, identifier):
             return False
+
+        try:
+            # Check if format is valid
+            fmtClass = getattr(pwfmt, fmt)
+        except:
+            raise AssertionError("Unknown format.")
+
+        if params is None:
+            params = fmtClass.default()
+
+        if not fmtClass.validate(params):
+            raise AssertionError("Invalid parameters.")
 
         entry = {"service"   : service,
                  "identifier": identifier,
                  "counter"   : 0,
-                 "pwfmt"     : pwfmt,
-                 "pwprm"     : pwprm}
+                 "format"    : fmt,
+                 "params"    : params}
 
         self.data["entries"].append(entry)
         return True
@@ -165,11 +177,9 @@ class Manager:
         # Note a + b + c represents concatenation in this case!
         output = hmac.new(self.key, a + b + c, sha512).digest()
         
-        # Truncate base64 from the right to keep padding bits 
-        return getattr(pwfmt, entry["pwfmt"])(output, entry["pwprm"]) 
-        # return pwfmt.base64(output, entry["length"])
-        # password = urlsafe_b64encode(output).decode("utf-8")
-        # return password[len(password) - entry["length"]:]
+        # Get the proper password formatter class 
+        fmtClass = getattr(pwfmt, entry["format"])
+        return fmtClass.format(output, entry["params"])
 
 ################################################################################
 ############################# ACTUAL SCRIPT BELOW  #############################
@@ -202,11 +212,11 @@ def main():
             parsers[cmd].add_argument("service")
             parsers[cmd].add_argument("identifier")
 
-        if cmd == "add": # the "add" argument needs format and params
-            parsers[cmd].add_argument("pwfmt", nargs = '?',
-                                      default = pwfmt.default)
-
-            parsers[cmd].add_argument("pwprm", nargs = '?', default = None)
+        if cmd == "add": # the "add" argument has optional arguments
+            parsers[cmd].add_argument("-f", "--fmt", nargs = 2,
+                                      default = (pwfmt.default, None),
+                                      metavar = ("FORMAT", "PARAMS"),
+                                      help = "password formatting options")
 
     arg = master.parse_args()
     cmd = arg.command
@@ -250,7 +260,9 @@ def main():
         elif cmd == "add":
             f = Manager(arg.user, True)
 
-            if not f.Add(arg.service, arg.identifier, arg.pwfmt, arg.pwprm):
+            fmt = arg.fmt[0]
+            params = int(arg.fmt[1])
+            if not f.Add(arg.service, arg.identifier, fmt, params):
                 print("Entry already exists.")
 
             f.Finish()

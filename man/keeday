@@ -15,8 +15,8 @@ where "user" is the user name passed to keeday and "~" is the system user's home
 .B keeday new [user]
 will create a new user file, and prompt you for a passphrase. Make sure this passphrase is sufficiently long and known only to you, and remember it. After this command returns, your user file will contain some authentication data, used to verify your passphrase in further commands. This data does not compromise your passphrase in any way, and may be made public if required. This command will fail if the user already exists.
 
-.B keeday add [user] [service] [identifier] [length]
-will add a new password entry to the user file of [user], using the two tokens [service] and [identifier]. The last token (length in characters of the derived password) is optional and will default to whatever default value is set in the tool (typically 25). This command will fail if an identical entry with the same [service] and [identifier] tokens is already present, or if the user does not exist.
+.B keeday add (-f/--fmt format params) [user] [service] [identifier]
+will add a new password entry to the user file of [user], using the two tokens [service] and [identifier]. The -f or --fmt flag is optional and lets you specify password formatting options, the first argument should be a valid password formatting class, such as "Base64" or "Hexadecimal" (see pwfmt.py) and the second argument is an integer parameter to said password formatting class, generally representing the length of the password. These options are all-or-nothing, you can't specify only one of them. If left unspecified, they will default to a Base64-encoded password with a length of 25 characters. This command will fail if an identical entry with the same [service] and [identifier] tokens is already present, or if the user does not exist.
 
 .B keeday delete [user] [service] [identifier]
 will delete an existing password entry from the user file of [user]. This command will fail if no such entry is present, or if the user does not exist.
