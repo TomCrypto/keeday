@@ -6,7 +6,7 @@
 # class FormatName:
 #     @staticmethod
 #     def default():
-#         return # a sensible default parameter
+#         # return a sensible default parameter
 #
 #     @staticmethod
 #     def validate(param):
@@ -42,7 +42,7 @@ default = 'Base64'
 # 29fd212d9919a18
 
 # Parameter limits and entropy measure:
-# 0 < length <= 128
+# 1 <= length <= 128
 # entropy = length * 4 bits
 class Hexadecimal:
     @staticmethod
@@ -52,7 +52,7 @@ class Hexadecimal:
     @staticmethod
     def validate(length):
         try:
-            return (length > 0) and (length <= 128)
+            return 1 <= length <= 128
         except:
             return False
 
@@ -86,7 +86,7 @@ class Base64:
     @staticmethod
     def validate(length):
         try:
-            return (length > 2) and (length <= 80)
+            return 2 < length <= 80
         except:
             return False
 
@@ -111,8 +111,8 @@ class Base64:
 # Data-Beta-Gamma-6-5
 
 # Parameter limits and entropy measure:
-# 4 < count <= 64 (could be higher with more efficient sampling, but ehh) 
-# entropy = 15.77 + 4.169 * (count - 4) bits
+# 4 < length <= 64 (could be higher with more efficient sampling, but ehh) 
+# entropy = 15.77 + 4.169 * (length - 4) bits
 
 # Additional notes: if you want to play with the mappings, their size MUST be
 # a power of two, otherwise naively doing raw[t] % size is INVALID.
@@ -125,7 +125,7 @@ class StarTrek:
     @staticmethod
     def validate(length):
         try:
-            return (length > 4) and (length <= 64)
+            return 4 < length <= 64
         except:
             return False
 
@@ -135,9 +135,9 @@ class StarTrek:
 
     @staticmethod
     def format(raw, length):
-        # Mappings, which includes 0-9, greek alphabet words and names. I excluded
-        # phonetically similar words, to facilitate remembering the passphrases, I
-        # also tried to select an aesthetically pleasing alphanumeric balance...
+        # Mappings, which includes numbers 0-9, greek alphabet words/names. I
+        # excluded phonetically similar words, to facilitate remembering the
+        # passphrases, and tried to choose a pleasing alphanumeric balance
         letters = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Theta', 
                    'Theta', 'Kappa', 'Lambda', 'Omicron', 'Sigma', 'Omega']
         numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -155,3 +155,56 @@ class StarTrek:
             words.append(mapping[raw[t] % len(mapping)])
             
         return '-'.join(words)
+
+ #############################################################################
+ #############################################################################
+
+# Arbitrary length PIN generator. Can always come in handy, I guess.
+
+# Examples:
+# 9153
+# 484918
+
+# Parameter limits and entropy measure:
+# 4 <= length <= 32 (probabilistic sampling with potential for failure) 
+# entropy = 3.32 * length bits
+
+# Additional notes: this format can FAIL as the mapping algorithm to go from
+# a byte (0..255) to a digit (0..9) is probabilistic. However, even with the
+# longest length parameter available the odds of failing are equal to:
+# (6 / 256)^32 ~ 6.9 * 10^-53
+# So it will almost certainly not happen in practice. However, if the format
+# one day enters an infinite loop or raises a mysterious exception, this may
+# be why. If so, congratulations, you just won the lottery 6 times in a row.
+
+class PIN:
+    @staticmethod
+    def default():
+        return 6 # This is quite low, though a PIN is not really meant to be
+                 # the pinnacle of cryptography, so much as to be convenient
+
+    @staticmethod
+    def validate(length):
+        try:
+            return 4 <= length <= 32
+        except:
+            return False
+
+    @staticmethod
+    def entropy(length):
+        return 3.32 * length
+
+    @staticmethod
+    def format(raw, length):
+        index = 0
+        password = ""
+        while len(password) != length:
+            val = raw[index]
+            if val < 250:
+                password += str(val // 25) # unbiased 0..249 -> 0..9
+            
+            index += 1 # If val >= 250, fail and try next byte
+            if index > 63: # This path is *EXTREMELY UNLIKELY*
+                raise AssertionError("Ran out of entropy!")
+
+        return password

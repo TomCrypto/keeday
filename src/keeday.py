@@ -4,6 +4,7 @@
 # keeday - password derivation tool
 # TomCrypto (contact: github)
 # Header written 23 Jan 2013
+# Last update on 22 May 2013
 
 # Operating system and filesystem management modules
 from os.path import expanduser, exists, isfile
@@ -14,6 +15,7 @@ from os import makedirs
 from base64 import b64encode, b64decode
 from hashlib import sha512
 from pbkdf2 import pbkdf2
+from struct import pack
 import hmac
 
 # Miscellaneous imports
@@ -35,12 +37,24 @@ SALT_LEN = 40
 EMPTY = '''{"authentication":{"auth_salt":"","auth_hash":"","iteration":0},
             "entries":[]}'''
 
+# This is a basic constant time comparison, I know there's one in the Python
+# library but it's 3.3+ only and I'm going for full Python 3.* compatibility
+def ccmp(a, b):
+    compare = 0
+
+    # Credit to Nate Lawson for this code snippet taken from the following:
+    # http://rdist.root.org/2010/01/07/timing-independent-array-comparison/
+    for x, y in zip(a, b):
+        compare |= x ^ y
+
+    return compare == 0
+
 class Manager:
     def __init__(self, user, mustexist):
         p = expanduser("~") + "/.keeday/"
         self.path = [p, p + user + ".key"]
 
-        # Create /.keeday/ if needed
+        # Create ~/.keeday/ if needed
         if not exists(self.path[0]):
             makedirs(self.path[0])
 
@@ -93,7 +107,7 @@ class Manager:
         comp = sha512(self.key).digest()[:len(salt)]
         auth = b64decode(auth_str.encode("utf-8"))
 
-        return comp == auth # need constant-time comparison
+        return ccmp(comp, auth)
 
     def Find(self, service, identifier, delete = False):
         for entry in self.data["entries"]:
@@ -111,8 +125,7 @@ class Manager:
         return self.Find(service, identifier) != False
 
     def Delete(self, service, identifier):
-        entry = self.Find(service, identifier, True)
-        return entry
+        return self.Find(service, identifier, True)
 
     def Add(self, service, identifier, fmt, param):
         if self.Exists(service, identifier):
@@ -163,7 +176,7 @@ class Manager:
         # Convert each token to a binary format
         tokenA = entry["service"].encode("utf-8")
         tokenB = entry["identifier"].encode("utf-8")
-        tokenC = entry["counter"].to_bytes(8, "big") # 64-bit counter
+        tokenC = pack(">Q", entry["counter"]) # 64-bit counter
 
         # Check that the passphrase is correct
         if not self.CheckPassphrase(passphrase):
