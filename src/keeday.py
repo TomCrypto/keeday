@@ -4,7 +4,7 @@
 # keeday - password derivation tool
 # TomCrypto (contact: github)
 # Header written 23 Jan 2013
-# Last update on 22 May 2013
+# Last update on  3 Jun 2013
 
 # Operating system and filesystem management modules
 from os.path import expanduser, exists, isfile
@@ -80,6 +80,9 @@ class Manager:
         output = json.dumps(self.data, indent = 2, sort_keys = True)
         with open(self.path[1], "w") as userfile:
             userfile.write(output + "\n")
+
+    def Entries(self):
+        return self.data["entries"]
 
     def ChangePassphrase(self, passphrase):
         pw = passphrase.encode("utf-8")
@@ -208,6 +211,7 @@ def main():
     commands = {"new"        : "create a new user file",
                 "remove"     : "remove existing user file",
                 "passphrase" : "change user passphrase",
+                "merge"      : "merges two user files",
                 "clean"      : "clean up a user file",
                 "add"        : "add a password entry",
                 "delete"     : "remove a password entry",
@@ -230,6 +234,9 @@ def main():
                                       default = pwfmt.default)
             parsers[cmd].add_argument("-p", "--param", nargs = '?',
                                       default = None, type = int)
+
+        if cmd == "merge": # the "merge" argument takes two user files
+            parsers[cmd].add_argument("source")
 
     arg = master.parse_args()
     cmd = arg.command
@@ -312,6 +319,26 @@ def main():
                     print("Entry does not exist.") # should not happen
                 else:
                     print("Password  : " + pw)
+
+        elif cmd == "merge":
+            dst = Manager(arg.user, True)
+            src = Manager(arg.source, True)
+            addCount = 0
+
+            # This is a conservative merge - we pull every entry from "src"
+            # which isn't in "dst". No entry is deleted from either file.
+            for entry in src.Entries():
+                if not dst.Exists(entry["service"], entry["identifier"]):
+                    dst.Entries().append(entry)
+                    addCount += 1
+
+            dst.Finish()
+
+            if addCount == 0:
+                print("No entries merged.")
+            else:
+                msg = "Merged {0} entries ({1} -> {2})."
+                print(msg.format(addCount, arg.source, arg.user))
 
         else:
             print("Command not recognized.")

@@ -152,6 +152,22 @@ to be sensitive data) so this should be used for maintenance purposes only.
 
  ------------------------------------------------------------------------------
 
+Another useful command is shown below:
+
+ keeday merge [user] [source]
+
+Which does exactly what it says. It will merge all entries in the [source] user
+file which don't already exist in [user]. This is a conservative merge and will
+not delete any entry from any file ([source] is never modified). You might find
+it useful for synchronizing user files. Counters are currently ignored, thus if
+you have updated or reverted passwords you will need to update those manually.
+
+Make sure you merge files in the right direction - the simplest way to remember
+is that, for every keeday command, the first argument [user] is always the user
+on which the command operates.
+
+ ------------------------------------------------------------------------------
+
 Finally, there is one final instruction:
 
  keeday clean [user]

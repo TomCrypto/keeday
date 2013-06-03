@@ -36,6 +36,9 @@ will change the passphrase for [user]. The old passphrase is not required, but e
 .B keeday remove [user]
 will remove the user [user], by deleting its user file. This command will fail if the user does not exist.
 
+.B keeday merge [user] [source]
+will merge entries from [source] into [user] conservatively. It will not produce duplicate entries and will not delete any entries. The user file of [source] will never be modified. This command will fail if the user does not exist, or if the [source] user does not exist. It is possible no entry will be merged as a result of this operation.
+
 .B keeday clean [user]
 will restore default formatting on the user file. This has no effect on the program's output, but can help clean up a user file which has been manually edited. This command will fail if the user does not exist.
 
