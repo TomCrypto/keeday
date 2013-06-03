@@ -337,8 +337,8 @@ def main():
             if addCount == 0:
                 print("No entries merged.")
             else:
-                msg = "Merged {0} entries ({1} -> {2})."
-                print(msg.format(addCount, arg.source, arg.user))
+                msg = "Merged {0} entries ({1} <- {2})."
+                print(msg.format(addCount, arg.user, arg.source))
 
         else:
             print("Command not recognized.")
