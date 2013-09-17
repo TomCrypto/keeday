@@ -124,6 +124,15 @@ class Manager:
 
         return False
 
+    def MatchingIdentifiers(self, service):
+        identifiers = []
+
+        for entry in self.data["entries"]:
+            if entry["service"] == service:
+                identifiers += [entry["identifier"]]
+
+        return identifiers
+
     def Exists(self, service, identifier):
         return self.Find(service, identifier) != False
 
@@ -212,7 +221,7 @@ def main():
                 "remove"     : "remove existing user file",
                 "passphrase" : "change user passphrase",
                 "merge"      : "merges two user files",
-                "clean"      : "clean up a user file",
+                "clean"      : "reformat a user file",
                 "add"        : "add a password entry",
                 "delete"     : "remove a password entry",
                 "update"     : "update a password entry",
@@ -227,7 +236,11 @@ def main():
 
         if cmd in ["add", "delete", "update", "revert", "get"]:
             parsers[cmd].add_argument("service")
-            parsers[cmd].add_argument("identifier")
+
+            if cmd == "get":
+                parsers[cmd].add_argument("identifier", nargs = '?')
+            else:
+                parsers[cmd].add_argument("identifier")
 
         if cmd == "add": # the "add" argument has format arguments
             parsers[cmd].add_argument("-f", "--fmt", nargs = '?',
@@ -305,6 +318,20 @@ def main():
 
         elif cmd == "get":
             f = Manager(arg.user, True)
+
+            if arg.identifier == None:
+                identifiers = f.MatchingIdentifiers(arg.service)
+                if len(identifiers) == 0:
+                    print("No identifiers under '" + arg.service + "'.")
+                    return
+
+                elif len(identifiers) > 1:
+                    print("Multiple identifiers under '" + arg.service + "'.")
+                    return
+
+                else:
+                    arg.identifier = identifiers[0]
+
             if not f.Exists(arg.service, arg.identifier):
                 print("Entry does not exist.")
             else:

@@ -46,6 +46,10 @@ mail server our identifier is probably just our email address.
 Note that it is all up to you what to write in those fields as all the above is
 purely indicative and you can use the two fields in any way you see fit.
 
+Also note, that quotes around the command arguments are needed if you happen to
+use arguments which contain spaces (as usual). In this case they are not needed
+and removing the quotation marks around the arguments will make no difference.
+
  ------------------------------------------------------------------------------
 
 There is a optional argument -f or --fmt which lets you specify a custom format
@@ -93,6 +97,15 @@ If you typed the arguments right, a password should appear - this password will
 always be the same, given the same two fields and passphrase. The password will
 be formatted according to the format you chose upon adding it. You can use this
 password, in this case, on your Gmail account.
+
+If you only have one identifier under a given service (in this case if you only
+have this Gmail address in your user file) then you may omit the identifier and
+the tool will automatically infer it for you. Therefore, in this case:
+
+ keeday get johndoe "Gmail"
+
+Will produce the same results. If you have more than one Gmail address, though,
+the tool will ask you to specify which one you mean, to remove ambiguity.
 
  ------------------------------------------------------------------------------
 
