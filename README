@@ -219,6 +219,16 @@ your passphrase or your individual passwords.
 Of course you can always encrypt the user file for backup or archival with your
 favorite file encryption tool, it's just a simple text file.
 
+If you are particularly paranoid, and have good memory, you don't even strictly
+need to keep around the entire list of password entries - you may keep only the
+"authentication" section of the JSON file and strip away the rest, and generate
+the password entries again when needed by committing the service, identifier to
+memory. This has the disadvantage of making password updating difficult, as you
+may find it hard to remember how many times you updated such and such password)
+but on the upside, all your password entries are now only in your memory.
+
+Improved support for this type of usage is planned for keeday.
+
  ------------------------------------------------------------------------------
 
 Thank you for using keeday!
